@@ -43,7 +43,7 @@ export default function Sesion({ onNavigate }: Props) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
       {/* Header */}
-      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 20, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 20, position: 'relative' }}>
         <StripeBar />
         <div style={{ padding: '10px 18px 0', position: 'relative' }}>
           <button
@@ -65,7 +65,7 @@ export default function Sesion({ onNavigate }: Props) {
       </div>
 
       {/* Volume card — overlaps header */}
-      <div style={{ margin: '0 16px', marginTop: -16 }}>
+      <div style={{ margin: '12px 16px 0' }}>
         <div style={{ background: brand.surface, borderRadius: brand.radiusLg, boxShadow: brand.shadowLg, padding: '14px 16px', borderLeft: `3px solid ${brand.red}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontSize: 12, color: brand.gray500, fontWeight: 600 }}>Volumen del día</span>

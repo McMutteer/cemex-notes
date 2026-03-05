@@ -8,6 +8,7 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
         background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden',
         boxShadow: '0 32px 80px rgba(41,48,100,0.28), 0 8px 24px rgba(0,0,0,0.14)',
         position: 'relative',
+        transform: 'translateZ(0)',
       }}>
         {/* Physical buttons */}
         <div style={{ position: 'absolute', left: -16, top: 118, width: 4, height: 30, background: '#1C2245', borderRadius: 3 }} />
@@ -56,7 +57,7 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div id="phone-shell-content" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
           {children}
         </div>
 

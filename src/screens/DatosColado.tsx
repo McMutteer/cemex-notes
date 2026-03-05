@@ -218,17 +218,18 @@ export default function DatosColado({ onNavigate }: Props) {
                   style={{
                     padding: '7px 12px',
                     borderRadius: brand.radiusFull,
-                    border: `1.5px solid ${selected ? brand.navy : brand.border}`,
-                    background: selected ? brand.navyLight : brand.surfaceMuted,
-                    color: selected ? brand.navy : brand.gray400,
-                    fontSize: 12,
+                    border: `2px solid ${selected ? brand.navy : brand.border}`,
+                    background: selected ? brand.navy : brand.surfaceMuted,
+                    color: selected ? brand.white : brand.gray400,
+                    fontSize: 11,
                     fontWeight: 700,
                     cursor: 'pointer',
                     transition: 'all 0.15s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
-                  {selected && <IconCheck size={11} color={brand.navy} />}
-                  {selected ? ' ' : ''}{a}
+                  {a}
                 </button>
               )
             })}

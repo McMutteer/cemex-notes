@@ -246,7 +246,7 @@ export default function Plano({ onNavigate }: Props) {
   ]
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle, position: 'relative' }}>
       {/* Header */}
       <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 18, position: 'relative', overflow: 'hidden' }}>
         <StripeBar />

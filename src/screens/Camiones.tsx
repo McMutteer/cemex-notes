@@ -105,9 +105,9 @@ export default function Camiones({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle, position: 'relative' }}>
       {/* Header */}
-      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 20, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 20, position: 'relative' }}>
         <StripeBar />
         <div style={{ padding: '10px 18px 0', position: 'relative' }}>
           <button onClick={() => onNavigate('sesion')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}>
@@ -126,7 +126,7 @@ export default function Camiones({ onNavigate }: Props) {
       </div>
 
       {/* Stats bar */}
-      <div style={{ margin: '0 16px', marginTop: -16 }}>
+      <div style={{ margin: '12px 16px 0' }}>
         <div style={{ background: brand.surface, borderRadius: brand.radiusLg, boxShadow: brand.shadowMd, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', overflow: 'hidden' }}>
           {[
             { label: 'CRs', value: String(camiones.length), color: brand.navy },
