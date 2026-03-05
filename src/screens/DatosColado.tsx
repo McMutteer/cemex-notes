@@ -1,101 +1,329 @@
+import { useState } from 'react'
 import StripeBar from '../components/StripeBar'
 import { IconBack, IconCheck } from '../components/Icons'
+import { brand } from '../brand'
+import { useAppStore } from '../context/AppContext'
+import type { DatosColadoData } from '../types'
 
 interface Props {
   onNavigate: (screen: string) => void
 }
 
-const Field = ({ label, value }: { label: string; value: string }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-    <label style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</label>
-    <div style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', borderRadius: 12, padding: '10px 12px', fontSize: 13, color: '#1E293B', fontWeight: 600 }}>
-      {value}
-    </div>
-  </div>
-)
+const TIPO_PRODUCTO_OPTIONS = ['Concreto Normal', 'Bombeado', 'Impermeabilizado', 'Con fibra', 'Autocompactante']
+const FRECUENCIA_OPTIONS = ['Cada camión', 'Cada 10 min', 'Cada 15 min', 'Cada 20 min', 'Cada 30 min', 'Cada 60 min']
+const TAM_AGREGADO_OPTIONS = ['3/8"', '1/2"', '3/4"', '1"']
+const ADITIVOS_OPTIONS = ['Plastificante', 'Superplastificante', 'Retardante', 'Acelerante', 'Impermeabilizante', 'Microsílice']
 
-const Toggle = ({ label, value }: { label: string; value: boolean }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F1F3F5' }}>
-    <span style={{ fontSize: 13, color: '#1E293B' }}>{label}</span>
-    <div style={{ width: 22, height: 22, borderRadius: '50%', background: value ? '#16A34A' : '#E9ECEF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {value && <IconCheck size={12} color="#fff" />}
+const sectionCard: React.CSSProperties = {
+  background: brand.surface,
+  borderRadius: brand.radiusLg,
+  padding: '14px 16px',
+  boxShadow: brand.shadowMd,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 10,
+}
+
+const sectionLabel: React.CSSProperties = {
+  ...brand.textLabel,
+  color: brand.gray400,
+  margin: 0,
+}
+
+const inputBase: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 12px',
+  borderRadius: brand.radiusMd,
+  border: `1.5px solid ${brand.border}`,
+  fontSize: 13,
+  color: brand.gray800,
+  background: brand.surface,
+  fontFamily: 'inherit',
+  fontWeight: 600,
+  boxSizing: 'border-box' as const,
+}
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 10,
+  color: brand.gray400,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: 0.6,
+  marginBottom: 4,
+  display: 'block',
+}
+
+function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <label style={labelStyle}>{label}</label>
+      {children}
     </div>
-  </div>
-)
+  )
+}
 
 export default function DatosColado({ onNavigate }: Props) {
+  const { sesiones, activeSessionId, updateSesion } = useAppStore()
+  const sesion = sesiones.find(s => s.id === activeSessionId)
+  const existing = sesion?.datosColado
+
+  const [tipoProducto, setTipoProducto] = useState(existing?.tipoProducto ?? '')
+  const [fc, setFc] = useState(existing?.fc ?? '')
+  const [fcUnit, setFcUnit] = useState<'kg/cm2' | 'MPa'>(existing?.fcUnit ?? 'kg/cm2')
+  const [espesor, setEspesor] = useState(existing?.espesor ?? '')
+  const [frecuenciaMuestreo, setFrecuenciaMuestreo] = useState(existing?.frecuenciaMuestreo ?? '')
+  const [slump, setSlump] = useState(existing?.slump ?? '')
+  const [tamMaxAgregado, setTamMaxAgregado] = useState(existing?.tamMaxAgregado ?? '')
+  const [aditivos, setAditivos] = useState<string[]>(existing?.aditivos ?? [])
+  const [pisero, setPisero] = useState(existing?.pisero ?? '')
+  const [laboratorio, setLaboratorio] = useState(existing?.laboratorio ?? '')
+  const [coordinadorCemex, setCoordinadorCemex] = useState(existing?.coordinadorCemex ?? '')
+  const [plantaOptima, setPlantaOptima] = useState(existing?.plantaOptima ?? '')
+  const [cantidadCR, setCantidadCR] = useState(existing?.cantidadCR ?? '')
+  const [tiempoCiclo, setTiempoCiclo] = useState(existing?.tiempoCiclo ?? '')
+  const [estadiaObra, setEstadiaObra] = useState(existing?.estadiaObra ?? '')
+  const [trayecto, setTrayecto] = useState(existing?.trayecto ?? '')
+  const [naveCerrada, setNaveCerrada] = useState(existing?.naveCerrada ?? false)
+  const [usaLaser, setUsaLaser] = useState(existing?.usaLaser ?? false)
+  const [reglaVibratoria, setReglaVibratoria] = useState(existing?.reglaVibratoria ?? false)
+  const [bumpCutter, setBumpCutter] = useState(existing?.bumpCutter ?? false)
+  const [barreraViento, setBarreraViento] = useState(existing?.barreraViento ?? false)
+  const [barreraVapor, setBarreraVapor] = useState(existing?.barreraVapor ?? false)
+  const [agregaFibra, setAgregaFibra] = useState(existing?.agregaFibra ?? false)
+  const [diamondDowel, setDiamondDowel] = useState(existing?.diamondDowel ?? false)
+  const [pronosticoLluvia, setPronosticoLluvia] = useState(existing?.pronosticoLluvia ?? false)
+  const [notas, setNotas] = useState(existing?.notas ?? '')
+
+  const toggleAditivo = (a: string) => {
+    setAditivos(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])
+  }
+
+  const handleSave = () => {
+    if (!activeSessionId) return
+    const data: DatosColadoData = {
+      tipoProducto, fc, fcUnit, espesor, frecuenciaMuestreo, slump, tamMaxAgregado,
+      aditivos, pisero, laboratorio, coordinadorCemex, plantaOptima, cantidadCR,
+      tiempoCiclo, estadiaObra, trayecto,
+      naveCerrada, usaLaser, reglaVibratoria, bumpCutter, barreraViento, barreraVapor,
+      agregaFibra, diamondDowel, pronosticoLluvia, notas,
+    }
+    updateSesion(activeSessionId, { datosColado: data })
+    onNavigate('sesion')
+  }
+
+  const checklistItems: [string, boolean, (v: boolean) => void][] = [
+    ['Nave cerrada', naveCerrada, setNaveCerrada],
+    ['Se utiliza láser', usaLaser, setUsaLaser],
+    ['Regla vibratoria', reglaVibratoria, setReglaVibratoria],
+    ['Bump Cutter', bumpCutter, setBumpCutter],
+    ['Barrera de viento', barreraViento, setBarreraViento],
+    ['Barrera de vapor', barreraVapor, setBarreraVapor],
+    ['Se agrega fibra', agregaFibra, setAgregaFibra],
+    ['Diamond Dowel', diamondDowel, setDiamondDowel],
+    ['Pronóstico de lluvia', pronosticoLluvia, setPronosticoLluvia],
+  ]
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#F1F3F5' }}>
-      <div style={{ background: '#293064', paddingBottom: 18 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
+      {/* Header */}
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 18, position: 'relative', overflow: 'hidden' }}>
         <StripeBar />
-        <div style={{ padding: '10px 18px 0' }}>
-          <button onClick={() => onNavigate('sesion')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}>
-            <IconBack size={16} color="rgba(255,255,255,0.6)" /> Sesión 25/Oct
+        <div style={{ padding: '10px 18px 0', position: 'relative' }}>
+          <button
+            onClick={() => onNavigate('sesion')}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}
+          >
+            <IconBack size={16} color="rgba(255,255,255,0.6)" />
+            {sesion?.fecha ?? 'Sesión'}
           </button>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ width: 4, height: 22, background: '#DF343D', borderRadius: 2, flexShrink: 0 }} />
-            <h1 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 800 }}>Datos del Colado</h1>
+            <div style={{ width: 4, height: 22, background: brand.red, borderRadius: 2, flexShrink: 0 }} />
+            <h1 style={{ margin: 0, color: brand.white, fontSize: 18, fontWeight: 800 }}>Datos del Colado</h1>
           </div>
         </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Mezcla</p>
-          <Field label="Producto" value="—" />
+        {/* Sección 1 — Mezcla */}
+        <div style={sectionCard}>
+          <p style={sectionLabel}>Mezcla</p>
+
+          <FieldGroup label="Tipo de producto">
+            <select
+              className="cemex-select"
+              value={tipoProducto}
+              onChange={e => setTipoProducto(e.target.value)}
+              style={{ ...inputBase }}
+            >
+              <option value="">Seleccionar...</option>
+              {TIPO_PRODUCTO_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </FieldGroup>
+
+          <FieldGroup label="Resistencia f'c">
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="cemex-input"
+                type="text"
+                value={fc}
+                onChange={e => setFc(e.target.value)}
+                placeholder="Ej. 300"
+                style={{ ...inputBase, flex: 1 }}
+              />
+              <button
+                onClick={() => setFcUnit(fcUnit === 'kg/cm2' ? 'MPa' : 'kg/cm2')}
+                style={{ padding: '10px 12px', borderRadius: brand.radiusMd, border: `1.5px solid ${brand.navy}`, background: brand.navyLight, color: brand.navy, fontSize: 11, fontWeight: 700, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
+              >
+                {fcUnit}
+              </button>
+            </div>
+          </FieldGroup>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Código" value="—" />
-            <Field label="Frecuencia" value="—" />
+            <FieldGroup label="Espesor (cm)">
+              <input className="cemex-input" type="text" value={espesor} onChange={e => setEspesor(e.target.value)} placeholder="Ej. 15" style={inputBase} />
+            </FieldGroup>
+            <FieldGroup label="Revenimiento (cm)">
+              <input className="cemex-input" type="text" value={slump} onChange={e => setSlump(e.target.value)} placeholder="Ej. 12 ± 2.5" style={inputBase} />
+            </FieldGroup>
           </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Espesor" value="—" />
-            <Field label="Revenimiento" value="—" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Fibra" value="—" />
-            <Field label="Acabado" value="—" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Volumen" value="—" />
-            <Field label="Horario inicio" value="—" />
+            <FieldGroup label="Frec. muestreo">
+              <select className="cemex-select" value={frecuenciaMuestreo} onChange={e => setFrecuenciaMuestreo(e.target.value)} style={{ ...inputBase }}>
+                <option value="">Seleccionar...</option>
+                {FRECUENCIA_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </FieldGroup>
+            <FieldGroup label="Tam. máx. agregado">
+              <select className="cemex-select" value={tamMaxAgregado} onChange={e => setTamMaxAgregado(e.target.value)} style={{ ...inputBase }}>
+                <option value="">Seleccionar...</option>
+                {TAM_AGREGADO_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </FieldGroup>
           </div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Responsables</p>
-          <Field label="Pisero" value="—" />
-          <Field label="Laboratorio" value="—" />
-          <Field label="Coordinador CEMEX" value="—" />
+        {/* Sección 2 — Aditivos */}
+        <div style={sectionCard}>
+          <p style={sectionLabel}>Aditivos</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {ADITIVOS_OPTIONS.map(a => {
+              const selected = aditivos.includes(a)
+              return (
+                <button
+                  key={a}
+                  onClick={() => toggleAditivo(a)}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: brand.radiusFull,
+                    border: `2px solid ${selected ? brand.navy : brand.border}`,
+                    background: selected ? brand.navy : brand.surfaceMuted,
+                    color: selected ? brand.white : brand.gray400,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  {a}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Producción</p>
-          <Field label="Planta óptima" value="—" />
+        {/* Sección 3 — Responsables */}
+        <div style={sectionCard}>
+          <p style={sectionLabel}>Responsables</p>
+          <FieldGroup label="Pisero">
+            <input className="cemex-input" type="text" value={pisero} onChange={e => setPisero(e.target.value)} placeholder="Nombre del pisero" style={inputBase} />
+          </FieldGroup>
+          <FieldGroup label="Laboratorio">
+            <input className="cemex-input" type="text" value={laboratorio} onChange={e => setLaboratorio(e.target.value)} placeholder="Nombre del laboratorio" style={inputBase} />
+          </FieldGroup>
+          <FieldGroup label="Coordinador CEMEX">
+            <input className="cemex-input" type="text" value={coordinadorCemex} onChange={e => setCoordinadorCemex(e.target.value)} placeholder="Nombre del coordinador" style={inputBase} />
+          </FieldGroup>
+        </div>
+
+        {/* Sección 4 — Producción */}
+        <div style={sectionCard}>
+          <p style={sectionLabel}>Producción</p>
+          <FieldGroup label="Planta óptima">
+            <input className="cemex-input" type="text" value={plantaOptima} onChange={e => setPlantaOptima(e.target.value)} placeholder="Nombre de la planta" style={inputBase} />
+          </FieldGroup>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Cantidad CR" value="—" />
-            <Field label="Tiempo ciclo" value="—" />
+            <FieldGroup label="Cantidad CR">
+              <input className="cemex-input" type="text" value={cantidadCR} onChange={e => setCantidadCR(e.target.value)} placeholder="Ej. 12" style={inputBase} />
+            </FieldGroup>
+            <FieldGroup label="Tiempo ciclo (min)">
+              <input className="cemex-input" type="text" value={tiempoCiclo} onChange={e => setTiempoCiclo(e.target.value)} placeholder="Ej. 45" style={inputBase} />
+            </FieldGroup>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Estadía en obra" value="—" />
-            <Field label="Trayecto" value="—" />
+            <FieldGroup label="Estadía en obra">
+              <input className="cemex-input" type="text" value={estadiaObra} onChange={e => setEstadiaObra(e.target.value)} placeholder="min" style={inputBase} />
+            </FieldGroup>
+            <FieldGroup label="Trayecto">
+              <input className="cemex-input" type="text" value={trayecto} onChange={e => setTrayecto(e.target.value)} placeholder="km" style={inputBase} />
+            </FieldGroup>
           </div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)' }}>
-          <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Checklist obra</p>
-          <Toggle label="Nave cerrada" value={false} />
-          <Toggle label="Se utiliza láser" value={false} />
-          <Toggle label="Regla vibratoria" value={false} />
-          <Toggle label="Bump Cutter" value={false} />
-          <Toggle label="Barrera de viento" value={false} />
-          <Toggle label="Barrera de vapor" value={false} />
-          <Toggle label="Se agrega fibra" value={false} />
-          <Toggle label="Diamond Dowel" value={false} />
-          <Toggle label="Pronóstico de lluvia" value={false} />
+        {/* Sección 5 — Checklist */}
+        <div style={{ ...sectionCard, gap: 0 }}>
+          <p style={{ ...sectionLabel, marginBottom: 6 }}>Checklist obra</p>
+          {checklistItems.map(([label, value, setter]) => (
+            <button
+              key={label}
+              onClick={() => setter(!value)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '11px 0', borderBottom: `1px solid ${brand.borderLight}`,
+                background: 'none', border: 'none', borderRadius: 0,
+                borderBottomWidth: 1, borderBottomStyle: 'solid', borderBottomColor: brand.borderLight,
+                cursor: 'pointer', width: '100%', textAlign: 'left',
+              }}
+            >
+              <span style={{ fontSize: 13, color: brand.gray800, fontWeight: value ? 700 : 500 }}>{label}</span>
+              <div style={{
+                width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                background: value ? brand.success : brand.gray200,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.15s',
+              }}>
+                {value && <IconCheck size={13} color={brand.white} />}
+              </div>
+            </button>
+          ))}
         </div>
 
-        <button style={{ width: '100%', background: '#293064', color: '#fff', borderRadius: 16, border: 'none', cursor: 'pointer', padding: '14px', fontSize: 13, fontWeight: 700 }}>
+        {/* Sección 6 — Notas */}
+        <div style={sectionCard}>
+          <p style={sectionLabel}>Notas adicionales</p>
+          <textarea
+            className="cemex-input"
+            value={notas}
+            onChange={e => setNotas(e.target.value)}
+            placeholder="Observaciones del colado..."
+            rows={3}
+            style={{ ...inputBase, resize: 'none', lineHeight: 1.5 }}
+          />
+        </div>
+
+        <button
+          onClick={handleSave}
+          style={{
+            width: '100%', background: brand.gradientHeader, color: brand.white,
+            borderRadius: brand.radiusLg, border: 'none', cursor: 'pointer',
+            padding: '14px', fontSize: 13, fontWeight: 700,
+            boxShadow: brand.shadowSm, letterSpacing: 0.3,
+          }}
+        >
           Guardar cambios
         </button>
       </div>

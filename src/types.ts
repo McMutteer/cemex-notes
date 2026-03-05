@@ -24,6 +24,7 @@ export interface Sesion {
   camiones: CamionCR[]
   muestras: Muestra[]
   fotos: FotoEvidencia[]
+  datosColado?: DatosColadoData
 }
 
 export interface AreaRect {
@@ -66,6 +67,35 @@ export interface CamionCR {
   rev: string
   tempConcreto: string
   esperaCliente: string
+}
+
+export interface DatosColadoData {
+  tipoProducto: string
+  fc: string
+  fcUnit: 'kg/cm2' | 'MPa'
+  espesor: string
+  frecuenciaMuestreo: string
+  slump: string
+  tamMaxAgregado: string
+  aditivos: string[]
+  pisero: string
+  laboratorio: string
+  coordinadorCemex: string
+  plantaOptima: string
+  cantidadCR: string
+  tiempoCiclo: string
+  estadiaObra: string
+  trayecto: string
+  naveCerrada: boolean
+  usaLaser: boolean
+  reglaVibratoria: boolean
+  bumpCutter: boolean
+  barreraViento: boolean
+  barreraVapor: boolean
+  agregaFibra: boolean
+  diamondDowel: boolean
+  pronosticoLluvia: boolean
+  notas: string
 }
 
 export interface AppState {
