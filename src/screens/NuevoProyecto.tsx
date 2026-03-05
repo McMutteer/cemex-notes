@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useAppStore } from '../context/AppContext'
 import StripeBar from '../components/StripeBar'
 import { IconBack, IconCamera } from '../components/Icons'
+import { brand } from '../brand'
 import type { Proyecto } from '../types'
 
 interface Props {
@@ -26,22 +27,23 @@ function compressImage(dataUrl: string, maxWidth = 800): Promise<string> {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px 14px',
-  borderRadius: 12,
-  border: '1.5px solid #E2E8F0',
+  borderRadius: brand.radiusMd,
+  border: `1.5px solid ${brand.border}`,
   fontSize: 14,
-  color: '#1E293B',
+  color: brand.gray800,
   outline: 'none',
   boxSizing: 'border-box',
   fontFamily: 'inherit',
-  background: '#fff',
+  background: brand.surface,
+  fontWeight: 500,
 }
 
 const labelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: 10,
   fontWeight: 700,
-  color: '#94A3B8',
+  color: brand.gray400,
   textTransform: 'uppercase',
-  letterSpacing: 0.5,
+  letterSpacing: 0.8,
   display: 'block',
   marginBottom: 6,
 }
@@ -87,67 +89,106 @@ export default function NuevoProyecto({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#F1F3F5' }}>
-      <div style={{ background: '#293064', paddingBottom: 20 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
+      {/* Header */}
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 20, position: 'relative', overflow: 'hidden' }}>
         <StripeBar />
-        <div style={{ padding: '10px 18px 0' }}>
-          <button onClick={() => onNavigate('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}>
+        <div style={{ padding: '10px 18px 0', position: 'relative' }}>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}
+          >
             <IconBack size={16} color="rgba(255,255,255,0.6)" /> Proyectos
           </button>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ width: 4, height: 22, background: '#DF343D', borderRadius: 2, flexShrink: 0 }} />
-            <h1 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 800 }}>Nuevo Proyecto</h1>
+            <div style={{ width: 4, height: 22, background: brand.red, borderRadius: 2, flexShrink: 0 }} />
+            <h1 style={{ margin: 0, color: brand.white, fontSize: 18, fontWeight: 800 }}>Nuevo Proyecto</h1>
           </div>
         </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 24px' }}>
-        <div style={{ background: '#fff', borderRadius: 16, padding: '18px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)', marginBottom: 12 }}>
-          <p style={{ margin: '0 0 14px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Información general</p>
+        {/* General info card */}
+        <div style={{ background: brand.surface, borderRadius: brand.radiusLg, padding: '18px 16px', boxShadow: brand.shadowMd, marginBottom: 12, border: `1px solid ${brand.borderLight}` }}>
+          <p style={{ margin: '0 0 14px', ...brand.textLabel, color: brand.gray400 }}>Información general</p>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Nombre del proyecto *</label>
-            <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej. Nave Vesta 4 Aguascalientes" style={inputStyle} />
+            <input className="cemex-input" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej. Nave Vesta 4 Aguascalientes" style={inputStyle} />
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Cliente</label>
-            <input value={cliente} onChange={e => setCliente(e.target.value)} placeholder="ej. VYACY" style={inputStyle} />
+            <input className="cemex-input" value={cliente} onChange={e => setCliente(e.target.value)} placeholder="ej. VYACY" style={inputStyle} />
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Contratista</label>
-            <input value={contratista} onChange={e => setContratista(e.target.value)} placeholder="ej. COPACHISA" style={inputStyle} />
+            <input className="cemex-input" value={contratista} onChange={e => setContratista(e.target.value)} placeholder="ej. COPACHISA" style={inputStyle} />
           </div>
 
           <div>
             <label style={labelStyle}>Coordinador CEMEX</label>
-            <input value={coordinador} onChange={e => setCoordinador(e.target.value)} placeholder="ej. Ing. Luis Alberto Cortes" style={inputStyle} />
+            <input className="cemex-input" value={coordinador} onChange={e => setCoordinador(e.target.value)} placeholder="ej. Ing. Luis Alberto Cortes" style={inputStyle} />
           </div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: '18px 16px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)', marginBottom: 16 }}>
-          <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Plano de la obra</p>
+        {/* Blueprint upload card */}
+        <div style={{ background: brand.surface, borderRadius: brand.radiusLg, padding: '18px 16px', boxShadow: brand.shadowMd, marginBottom: 16, border: `1px solid ${brand.borderLight}` }}>
+          <p style={{ margin: '0 0 12px', ...brand.textLabel, color: brand.gray400 }}>Plano de la obra</p>
 
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
 
           {planoPreview ? (
-            <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 10 }}>
+            <div style={{ position: 'relative', borderRadius: brand.radiusMd, overflow: 'hidden', marginBottom: 10 }}>
               <img src={planoPreview} alt="Plano" style={{ width: '100%', display: 'block', maxHeight: 200, objectFit: 'cover' }} />
-              <button onClick={() => fileInputRef.current?.click()} style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: 20, padding: '5px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.55)', color: brand.white, border: 'none', borderRadius: 20, padding: '5px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+              >
                 Cambiar
               </button>
             </div>
           ) : (
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{ width: '100%', border: '2px dashed #CBD5E1', borderRadius: 12, padding: '28px 0', background: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: '#94A3B8' }}>
-              <IconCamera size={28} color="#CBD5E1" />
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{uploading ? 'Procesando...' : 'Subir plano'}</span>
-              <span style={{ fontSize: 11 }}>JPG, PNG · se comprimirá automáticamente</span>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              style={{
+                width: '100%', border: `2px dashed ${brand.border}`, borderRadius: brand.radiusMd,
+                padding: '28px 0', background: uploading ? brand.surfaceMuted : brand.surfaceSubtle,
+                cursor: uploading ? 'not-allowed' : 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, color: brand.gray400,
+              }}
+            >
+              <div style={{ width: 44, height: 44, borderRadius: brand.radiusMd, background: brand.navyLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconCamera size={22} color={brand.navy} />
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.gray700 }}>{uploading ? 'Procesando...' : 'Subir plano'}</p>
+                <p style={{ margin: '3px 0 0', fontSize: 11, color: brand.gray400 }}>JPG, PNG · se comprimirá automáticamente</p>
+              </div>
             </button>
           )}
         </div>
 
-        <button onClick={handleSubmit} disabled={!nombre.trim()} style={{ width: '100%', background: nombre.trim() ? '#293064' : '#CBD5E1', color: '#fff', border: 'none', borderRadius: 14, padding: '15px', fontWeight: 700, fontSize: 14, cursor: nombre.trim() ? 'pointer' : 'not-allowed', transition: 'background 0.15s' }}>
+        <button
+          onClick={handleSubmit}
+          disabled={!nombre.trim()}
+          style={{
+            width: '100%',
+            background: nombre.trim() ? brand.gradientHeader : brand.gray300,
+            color: brand.white,
+            border: 'none',
+            borderRadius: brand.radiusLg,
+            padding: '15px',
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: nombre.trim() ? 'pointer' : 'not-allowed',
+            boxShadow: nombre.trim() ? brand.shadowSm : brand.shadowNone,
+            letterSpacing: 0.3,
+            transition: 'background 0.15s',
+          }}
+        >
           Crear proyecto
         </button>
       </div>

@@ -35,7 +35,7 @@ function loadFromStorage(): AppState {
       const parsed = JSON.parse(raw) as AppState
       if (parsed.proyectos && parsed.sesiones) {
         // Migrate: ensure all sessions have camiones and muestras fields
-        parsed.sesiones = parsed.sesiones.map(s => ({ camiones: [], muestras: [], fotos: [], ...s }))
+        parsed.sesiones = parsed.sesiones.map(s => ({ ...s, camiones: s.camiones ?? [], muestras: s.muestras ?? [], fotos: s.fotos ?? [] }))
         return parsed
       }
     }

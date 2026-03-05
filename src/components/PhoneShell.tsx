@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export default function PhoneShell({ children }: { children: ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: '#dde1e7' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: '#d4d8e0' }}>
       <div style={{
         width: 390, height: 844, borderRadius: 50, border: '12px solid #1C2245',
         background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden',
@@ -10,16 +10,17 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
         position: 'relative',
       }}>
         {/* Physical buttons */}
-        <div style={{ position: 'absolute', left: -15, top: 118, width: 4, height: 30, background: '#1C2245', borderRadius: 2 }} />
-        <div style={{ position: 'absolute', left: -15, top: 160, width: 4, height: 54, background: '#1C2245', borderRadius: 2 }} />
-        <div style={{ position: 'absolute', left: -15, top: 224, width: 4, height: 54, background: '#1C2245', borderRadius: 2 }} />
-        <div style={{ position: 'absolute', right: -15, top: 168, width: 4, height: 70, background: '#1C2245', borderRadius: 2 }} />
+        <div style={{ position: 'absolute', left: -16, top: 118, width: 4, height: 30, background: '#1C2245', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', left: -16, top: 160, width: 4, height: 54, background: '#1C2245', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', left: -16, top: 224, width: 4, height: 54, background: '#1C2245', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', right: -16, top: 168, width: 4, height: 70, background: '#1C2245', borderRadius: 3 }} />
 
         {/* Dynamic island */}
         <div style={{
           position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
           width: 118, height: 34, background: '#080808', borderRadius: 20, zIndex: 50,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.04)',
         }}>
           <div style={{ width: 10, height: 10, background: '#1a1a1a', borderRadius: '50%', border: '1.5px solid #2a2a2a' }} />
           <div style={{ width: 10, height: 10, background: '#111', borderRadius: '50%' }} />
@@ -28,7 +29,7 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
         {/* Status bar */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '52px 22px 6px', fontSize: 12, fontWeight: 700, color: '#1E293B', flexShrink: 0,
+          padding: '54px 22px 6px', fontSize: 12, fontWeight: 700, color: '#1E293B', flexShrink: 0,
         }}>
           <span>9:41</span>
           <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
@@ -61,7 +62,7 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
 
         {/* Home indicator */}
         <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', padding: '8px 0 12px', background: '#fff' }}>
-          <div style={{ width: 124, height: 5, background: '#1C2245', borderRadius: 3, opacity: 0.15 }} />
+          <div style={{ width: 134, height: 5, background: '#1C2245', borderRadius: 3, opacity: 0.18 }} />
         </div>
       </div>
     </div>

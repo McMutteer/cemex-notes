@@ -2,7 +2,8 @@ import { useState, useRef } from 'react'
 import { useAppStore } from '../context/AppContext'
 import { zonasMapa } from '../data'
 import StripeBar from '../components/StripeBar'
-import { IconBack } from '../components/Icons'
+import { IconBack, IconCamera, IconMap } from '../components/Icons'
+import { brand } from '../brand'
 import DrawRectOverlay from '../components/DrawRectOverlay'
 import MapeoOverlay from '../components/MapeoOverlay'
 import CRPickerSheet from '../components/CRPickerSheet'
@@ -37,53 +38,52 @@ function MuestraModal({ muestra, onSave, onDelete, onClose }: MuestraModalProps)
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: '#fff', borderRadius: '24px 24px 0 0', padding: '20px 20px 32px', maxHeight: '88vh', overflowY: 'auto' }}>
+      <div style={{ width: '100%', background: brand.surface, borderRadius: `${brand.radius2xl}px ${brand.radius2xl}px 0 0`, padding: '20px 20px 32px', maxHeight: '88vh', overflowY: 'auto', boxShadow: '0 -8px 32px rgba(41,48,100,0.14)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ width: 4, height: 20, background: '#7C3AED', borderRadius: 2 }} />
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1E293B' }}>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: brand.gray800 }}>
               {isNew ? 'Nueva muestra' : 'Muestra'}
             </h2>
           </div>
-          <button onClick={onClose} style={{ background: '#F1F3F5', border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button onClick={onClose} style={{ background: brand.surfaceSubtle, border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: brand.gray500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
 
-        {/* Etiqueta */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, display: 'block', marginBottom: 4 }}>Etiqueta / referencia</label>
+          <label style={{ fontSize: 10, color: brand.gray400, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 4 }}>Etiqueta / referencia</label>
           <input
-            style={{ width: '100%', background: '#F8F9FA', border: '1px solid #E9ECEF', borderRadius: 12, padding: '10px 12px', fontSize: 13, fontWeight: 600, color: '#1E293B', boxSizing: 'border-box' }}
+            className="cemex-input"
+            style={{ width: '100%', background: brand.surfaceMuted, border: `1.5px solid ${brand.border}`, borderRadius: brand.radiusMd, padding: '10px 12px', fontSize: 13, fontWeight: 600, color: brand.gray800, boxSizing: 'border-box', fontFamily: 'inherit' }}
             placeholder="Ej. M-1, Zona norte..."
             value={etiqueta}
             onChange={e => setEtiqueta(e.target.value)}
           />
         </div>
 
-        {/* Foto */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 10, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, display: 'block', marginBottom: 8 }}>Evidencia fotográfica</label>
+          <label style={{ fontSize: 10, color: brand.gray400, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 8 }}>Evidencia fotográfica</label>
           {imageDataUrl ? (
             <div style={{ position: 'relative' }}>
-              <img src={imageDataUrl} alt="Muestra" style={{ width: '100%', borderRadius: 12, display: 'block', maxHeight: 220, objectFit: 'cover' }} />
+              <img src={imageDataUrl} alt="Muestra" style={{ width: '100%', borderRadius: brand.radiusMd, display: 'block', maxHeight: 220, objectFit: 'cover' }} />
               <button
                 onClick={() => setImageDataUrl(null)}
-                style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 28, height: 28, color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 28, height: 28, color: brand.white, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >✕</button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => { if (fileRef.current) { fileRef.current.accept = 'image/*'; fileRef.current.capture = ''; fileRef.current.click() } }}
-                style={{ flex: 1, border: '2px dashed #CBD5E1', borderRadius: 12, padding: '16px 8px', background: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: '#94A3B8', fontSize: 12, fontWeight: 600 }}
+                style={{ flex: 1, border: `1.5px dashed ${brand.border}`, borderRadius: brand.radiusMd, padding: '16px 8px', background: brand.surfaceMuted, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: brand.gray400, fontSize: 12, fontWeight: 600 }}
               >
-                <span style={{ fontSize: 22 }}>🖼️</span>
+                <IconCamera size={20} color={brand.gray400} />
                 Galería
               </button>
               <button
                 onClick={() => { if (fileRef.current) { fileRef.current.accept = 'image/*'; fileRef.current.capture = 'environment'; fileRef.current.click() } }}
-                style={{ flex: 1, border: '2px dashed #CBD5E1', borderRadius: 12, padding: '16px 8px', background: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: '#94A3B8', fontSize: 12, fontWeight: 600 }}
+                style={{ flex: 1, border: `1.5px dashed ${brand.border}`, borderRadius: brand.radiusMd, padding: '16px 8px', background: brand.surfaceMuted, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: brand.gray400, fontSize: 12, fontWeight: 600 }}
               >
-                <span style={{ fontSize: 22 }}>📷</span>
+                <IconCamera size={20} color={brand.gray400} />
                 Cámara
               </button>
               <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={handleFile} />
@@ -93,7 +93,7 @@ function MuestraModal({ muestra, onSave, onDelete, onClose }: MuestraModalProps)
 
         <button
           onClick={() => { onSave(etiqueta, imageDataUrl); onClose() }}
-          style={{ width: '100%', background: '#7C3AED', color: '#fff', borderRadius: 14, border: 'none', cursor: 'pointer', padding: '14px', fontSize: 13, fontWeight: 700, marginBottom: onDelete ? 8 : 0 }}
+          style={{ width: '100%', background: '#7C3AED', color: brand.white, borderRadius: brand.radiusLg, border: 'none', cursor: 'pointer', padding: '14px', fontSize: 13, fontWeight: 700, marginBottom: onDelete ? 8 : 0, boxShadow: brand.shadowSm }}
         >
           {isNew ? 'Guardar muestra' : 'Guardar cambios'}
         </button>
@@ -101,7 +101,7 @@ function MuestraModal({ muestra, onSave, onDelete, onClose }: MuestraModalProps)
         {onDelete && (
           <button
             onClick={() => { onDelete(); onClose() }}
-            style={{ width: '100%', background: 'none', color: '#DF343D', borderRadius: 14, border: 'none', cursor: 'pointer', padding: '10px', fontSize: 13, fontWeight: 700 }}
+            style={{ width: '100%', background: 'none', color: brand.red, borderRadius: brand.radiusLg, border: 'none', cursor: 'pointer', padding: '10px', fontSize: 13, fontWeight: 700 }}
           >
             Eliminar muestra
           </button>
@@ -123,10 +123,9 @@ function MuestrasOverlay({ planoDataUrl, muestras, onTap, onPressMuestra }: Mues
   const downRef = useRef<{ x: number; y: number; t: number } | null>(null)
 
   return (
-    <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', boxShadow: '0 2px 12px rgba(41,48,100,0.1)' }}>
+    <div style={{ position: 'relative', borderRadius: brand.radiusMd, overflow: 'hidden', boxShadow: brand.shadowMd }}>
       <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none', pointerEvents: 'none' }} />
 
-      {/* Tap overlay */}
       <div
         style={{ position: 'absolute', inset: 0 }}
         onPointerDown={(e) => { downRef.current = { x: e.clientX, y: e.clientY, t: Date.now() } }}
@@ -143,7 +142,6 @@ function MuestrasOverlay({ planoDataUrl, muestras, onTap, onPressMuestra }: Mues
         }}
       />
 
-      {/* Pines de muestras */}
       {muestras.map((m) => (
         <button
           key={m.id}
@@ -248,23 +246,29 @@ export default function Plano({ onNavigate }: Props) {
   ]
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#F1F3F5' }}>
-      <div style={{ background: '#293064', paddingBottom: 18 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle }}>
+      {/* Header */}
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 18, position: 'relative', overflow: 'hidden' }}>
         <StripeBar />
-        <div style={{ padding: '10px 18px 0' }}>
+        <div style={{ padding: '10px 18px 0', position: 'relative' }}>
           <button onClick={() => onNavigate('sesion')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}>
             <IconBack size={16} color="rgba(255,255,255,0.6)" /> Sesión {sesion?.fecha ?? ''}
           </button>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ width: 4, height: 22, background: '#DF343D', borderRadius: 2, flexShrink: 0 }} />
-            <h1 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 800 }}>Plano y Mapeo</h1>
+            <div style={{ width: 4, height: 22, background: brand.red, borderRadius: 2, flexShrink: 0 }} />
+            <h1 style={{ margin: 0, color: brand.white, fontSize: 18, fontWeight: 800 }}>Plano y Mapeo</h1>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', margin: '12px 16px 0', background: '#E9ECEF', borderRadius: 12, padding: 4 }}>
+      {/* Tab bar */}
+      <div style={{ display: 'flex', margin: '12px 16px 0', background: brand.gray200, borderRadius: brand.radiusMd, padding: 4 }}>
         {tabs.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{ flex: 1, padding: '8px 0', fontSize: 12, fontWeight: 700, borderRadius: 9, border: 'none', cursor: 'pointer', background: tab === t.key ? '#fff' : 'transparent', color: tab === t.key ? '#1E293B' : '#94A3B8', boxShadow: tab === t.key ? '0 1px 4px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.15s' }}>
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{ flex: 1, padding: '8px 0', fontSize: 12, fontWeight: 700, borderRadius: 9, border: 'none', cursor: 'pointer', background: tab === t.key ? brand.surface : 'transparent', color: tab === t.key ? brand.navy : brand.gray400, boxShadow: tab === t.key ? brand.shadowSm : brand.shadowNone, transition: 'all 0.15s' }}
+          >
             {t.label}
           </button>
         ))}
@@ -277,10 +281,10 @@ export default function Plano({ onNavigate }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {planoDataUrl ? (
               <>
-                <p style={{ margin: 0, fontSize: 12, color: '#64748B', fontWeight: 600 }}>
+                <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
                   {activeArea ? 'Área actual marcada · Arrastra para redefinir' : 'Arrastra sobre el plano para definir el área del día'}
                 </p>
-                <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 8px rgba(41,48,100,0.08)' }}>
+                <div style={{ position: 'relative', borderRadius: brand.radiusMd, overflow: 'hidden', boxShadow: brand.shadowSm }}>
                   <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none' }} />
                   <DrawRectOverlay existingRect={activeArea} onConfirm={handleConfirmArea} />
                 </div>
@@ -290,14 +294,14 @@ export default function Plano({ onNavigate }: Props) {
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: 12, height: 12, borderRadius: 3, background: '#4ade80', opacity: 0.7 }} />
-                    <span style={{ fontSize: 11, color: '#64748B' }}>Colado</span>
+                    <span style={{ fontSize: 11, color: brand.gray500 }}>Colado</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: 3, background: '#CBD5E1' }} />
-                    <span style={{ fontSize: 11, color: '#64748B' }}>Pendiente</span>
+                    <div style={{ width: 12, height: 12, borderRadius: 3, background: brand.gray300 }} />
+                    <span style={{ fontSize: 11, color: brand.gray500 }}>Pendiente</span>
                   </div>
                 </div>
-                <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 1px 8px rgba(41,48,100,0.08)', overflow: 'hidden' }}>
+                <div style={{ background: brand.surface, borderRadius: brand.radiusLg, boxShadow: brand.shadowSm, overflow: 'hidden' }}>
                   <svg viewBox="0 0 100 100" style={{ width: '100%', aspectRatio: '1/1', display: 'block' }}>
                     <rect x="0" y="10" width="100" height="80" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.5" />
                     <rect x="2" y="3" width="15" height="10" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.5" />
@@ -312,7 +316,7 @@ export default function Plano({ onNavigate }: Props) {
                     ))}
                   </svg>
                 </div>
-                <p style={{ margin: 0, fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>
+                <p style={{ margin: 0, fontSize: 11, color: brand.gray400, textAlign: 'center' }}>
                   Sube el plano al crear el proyecto para verlo aquí
                 </p>
               </>
@@ -326,26 +330,26 @@ export default function Plano({ onNavigate }: Props) {
             {activeArea && planoDataUrl ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ margin: 0, fontSize: 12, color: '#64748B', fontWeight: 600 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
                     {(sesion?.markers?.length ?? 0) > 0
                       ? `${sesion!.markers.length} CR${sesion!.markers.length !== 1 ? 's' : ''} colocado${sesion!.markers.length !== 1 ? 's' : ''} · Toca para eliminar`
                       : 'Toca el plano para colocar un CR'}
                   </p>
-                  <button onClick={() => setTab('area')} style={{ fontSize: 11, fontWeight: 700, color: '#293064', background: '#EEF0F8', border: 'none', borderRadius: 20, padding: '4px 10px', cursor: 'pointer' }}>
+                  <button onClick={() => setTab('area')} style={{ fontSize: 11, fontWeight: 700, color: brand.navy, background: brand.navyLight, border: 'none', borderRadius: 20, padding: '4px 10px', cursor: 'pointer' }}>
                     Editar área
                   </button>
                 </div>
                 <MapeoOverlay planoDataUrl={planoDataUrl} area={activeArea} markers={sesion?.markers ?? []} onTap={handleTap} onRemoveMarker={handleRemoveMarker} />
                 {(sesion?.markers?.length ?? 0) > 0 && (
-                  <div style={{ background: '#fff', borderRadius: 14, padding: '12px 14px', boxShadow: '0 1px 8px rgba(41,48,100,0.07)' }}>
-                    <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5 }}>CRs registrados</p>
+                  <div style={{ background: brand.surface, borderRadius: brand.radiusMd, padding: '12px 14px', boxShadow: brand.shadowSm }}>
+                    <p style={{ margin: '0 0 10px', ...brand.textLabel, color: brand.gray400 }}>CRs registrados</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {sesion!.markers.map((m, i) => (
-                        <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EEF0F8', borderRadius: 20, padding: '4px 10px' }}>
-                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#293064', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <span style={{ color: '#fff', fontSize: 9, fontWeight: 800 }}>{i + 1}</span>
+                        <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: brand.navyLight, borderRadius: 20, padding: '4px 10px' }}>
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: brand.navy, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ color: brand.white, fontSize: 9, fontWeight: 800 }}>{i + 1}</span>
                           </div>
-                          <span style={{ fontSize: 11, color: '#1E293B', fontWeight: 600 }}>CR {m.cr}</span>
+                          <span style={{ fontSize: 11, color: brand.gray800, fontWeight: 600 }}>CR {m.cr}</span>
                         </div>
                       ))}
                     </div>
@@ -353,10 +357,10 @@ export default function Plano({ onNavigate }: Props) {
                 )}
               </>
             ) : (
-              <div style={{ background: '#FEF3C7', borderRadius: 14, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <span style={{ fontSize: 18 }}>📍</span>
+              <div style={{ background: brand.warningLight, borderRadius: brand.radiusMd, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <IconMap size={18} color={brand.warningText} />
                 <div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#92400E' }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.warningText }}>
                     {!planoDataUrl ? 'Sin plano en este proyecto' : 'Área de trabajo no definida'}
                   </p>
                   <p style={{ margin: '4px 0 0', fontSize: 11, color: '#B45309' }}>
@@ -373,7 +377,7 @@ export default function Plano({ onNavigate }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {planoDataUrl ? (
               <>
-                <p style={{ margin: 0, fontSize: 12, color: '#64748B', fontWeight: 600 }}>
+                <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
                   {muestras.length > 0
                     ? `${muestras.length} muestra${muestras.length !== 1 ? 's' : ''} registrada${muestras.length !== 1 ? 's' : ''} · Toca un pin para ver/editar`
                     : 'Toca el plano para registrar una muestra'}
@@ -389,37 +393,35 @@ export default function Plano({ onNavigate }: Props) {
                   }}
                 />
 
-                {/* Lista de muestras */}
                 {muestras.length > 0 && (
                   <div>
-                    <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Muestras tomadas</p>
+                    <p style={{ margin: '0 0 8px', ...brand.textLabel, color: brand.gray400 }}>Muestras tomadas</p>
                     {muestras.map((m, i) => (
                       <button
                         key={m.id}
                         onClick={() => setEditingMuestra(m)}
-                        style={{ width: '100%', background: '#fff', borderRadius: 14, padding: 0, boxShadow: '0 1px 8px rgba(41,48,100,0.07)', marginBottom: 8, border: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', display: 'flex' }}
+                        style={{ width: '100%', background: brand.surface, borderRadius: brand.radiusMd, padding: 0, boxShadow: brand.shadowSm, marginBottom: 8, border: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', display: 'flex' }}
                       >
-                        {/* Miniatura o placeholder */}
                         <div style={{ width: 72, height: 72, flexShrink: 0, background: m.imageDataUrl ? 'transparent' : '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {m.imageDataUrl
                             ? <img src={m.imageDataUrl} alt="Muestra" style={{ width: 72, height: 72, objectFit: 'cover', display: 'block' }} />
-                            : <span style={{ fontSize: 24 }}>🔬</span>
+                            : <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, fontWeight: 800, color: '#7C3AED' }}>M</span></div>
                           }
                         </div>
                         <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <div style={{ width: 20, height: 20, borderRadius: 6, background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <span style={{ color: '#fff', fontSize: 10, fontWeight: 800 }}>{i + 1}</span>
+                              <span style={{ color: brand.white, fontSize: 10, fontWeight: 800 }}>{i + 1}</span>
                             </div>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{m.etiqueta || `Muestra ${i + 1}`}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{m.etiqueta || `Muestra ${i + 1}`}</span>
                           </div>
-                          <span style={{ fontSize: 10, color: '#94A3B8', marginTop: 3 }}>
+                          <span style={{ fontSize: 10, color: brand.gray400, marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
                             {m.imageDataUrl ? 'Con foto · ' : 'Sin foto · '}
                             Pos {m.x.toFixed(0)}%, {m.y.toFixed(0)}%
                           </span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-                          <span style={{ fontSize: 16, color: '#CBD5E1' }}>›</span>
+                          <span style={{ fontSize: 16, color: brand.gray300 }}>›</span>
                         </div>
                       </button>
                     ))}
@@ -427,8 +429,8 @@ export default function Plano({ onNavigate }: Props) {
                 )}
               </>
             ) : (
-              <div style={{ background: '#F5F3FF', borderRadius: 14, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <span style={{ fontSize: 18 }}>🔬</span>
+              <div style={{ background: '#F5F3FF', borderRadius: brand.radiusMd, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <IconCamera size={18} color="#7C3AED" />
                 <div>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#5B21B6' }}>Sin plano en este proyecto</p>
                   <p style={{ margin: '4px 0 0', fontSize: 11, color: '#7C3AED' }}>El plano se sube al crear el proyecto para poder marcar muestras.</p>
@@ -439,20 +441,18 @@ export default function Plano({ onNavigate }: Props) {
         )}
       </div>
 
-      {/* CR picker para mapeo */}
       {pickerPending && camionesParaPicker.length > 0 && (
         <CRPickerSheet camiones={camionesParaPicker} onPick={handlePickCR} onClose={() => setPickerPending(null)} />
       )}
       {pickerPending && camionesParaPicker.length === 0 && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }} onClick={() => setPickerPending(null)}>
-          <div style={{ width: '100%', background: '#fff', borderRadius: '24px 24px 0 0', padding: '24px 20px 36px' }}>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1E293B' }}>Sin camiones registrados</p>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: '#94A3B8' }}>Registra primero los CRs en "Camiones CR" antes de marcarlos en el plano.</p>
+          <div style={{ width: '100%', background: brand.surface, borderRadius: `${brand.radius2xl}px ${brand.radius2xl}px 0 0`, padding: '24px 20px 36px', boxShadow: '0 -8px 32px rgba(41,48,100,0.14)' }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: brand.gray800 }}>Sin camiones registrados</p>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: brand.gray400 }}>Registra primero los CRs en "Camiones CR" antes de marcarlos en el plano.</p>
           </div>
         </div>
       )}
 
-      {/* Modal nueva muestra */}
       {muestraPending && (
         <MuestraModal
           onSave={handleSaveMuestra}
@@ -460,7 +460,6 @@ export default function Plano({ onNavigate }: Props) {
         />
       )}
 
-      {/* Modal editar muestra */}
       {editingMuestra && (
         <MuestraModal
           muestra={editingMuestra}
