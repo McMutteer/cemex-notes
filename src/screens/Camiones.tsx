@@ -59,14 +59,14 @@ function CamionModal({ initial, onClose, onSave }: ModalProps) {
           <button onClick={onClose} style={{ background: brand.surfaceSubtle, border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: brand.gray500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div><label style={labelStyle}># CR</label><input className="cemex-input" style={inputStyle} placeholder="5894" value={cr} onChange={e => setCr(e.target.value)} /></div>
-          <div><label style={labelStyle}>m³</label><input className="cemex-input" style={inputStyle} placeholder="7" type="number" value={m3} onChange={e => setM3(e.target.value)} /></div>
-          <div><label style={labelStyle}>Hora llegada</label><input type="time" className="cemex-input" style={inputStyle} value={horaLlegada} onChange={e => setHoraLlegada(e.target.value)} /></div>
-          <div><label style={labelStyle}>Hora inicio</label><input type="time" className="cemex-input" style={inputStyle} value={horaInicio} onChange={e => setHoraInicio(e.target.value)} /></div>
-          <div><label style={labelStyle}>Hora término</label><input type="time" className="cemex-input" style={inputStyle} value={horaTermino} onChange={e => setHoraTermino(e.target.value)} /></div>
-          <div><label style={labelStyle}>Rev</label><input className="cemex-input" style={inputStyle} placeholder="11" value={rev} onChange={e => setRev(e.target.value)} /></div>
-          <div><label style={labelStyle}>Temp. Concreto (°C)</label><input className="cemex-input" style={inputStyle} placeholder="31.3" value={temp} onChange={e => setTemp(e.target.value)} /></div>
-          <div><label style={labelStyle}>Espera Cliente</label><input className="cemex-input" style={inputStyle} placeholder="0 mins" value={espera} onChange={e => setEspera(e.target.value)} /></div>
+          <div><label htmlFor="camion-cr" style={labelStyle}># CR</label><input id="camion-cr" className="cemex-input" style={inputStyle} placeholder="5894" value={cr} onChange={e => setCr(e.target.value)} /></div>
+          <div><label htmlFor="camion-m3" style={labelStyle}>m³</label><input id="camion-m3" className="cemex-input" style={inputStyle} placeholder="7" type="number" value={m3} onChange={e => setM3(e.target.value)} /></div>
+          <div><label htmlFor="camion-llegada" style={labelStyle}>Hora llegada</label><input id="camion-llegada" type="time" className="cemex-input" style={inputStyle} value={horaLlegada} onChange={e => setHoraLlegada(e.target.value)} /></div>
+          <div><label htmlFor="camion-inicio" style={labelStyle}>Hora inicio</label><input id="camion-inicio" type="time" className="cemex-input" style={inputStyle} value={horaInicio} onChange={e => setHoraInicio(e.target.value)} /></div>
+          <div><label htmlFor="camion-termino" style={labelStyle}>Hora término</label><input id="camion-termino" type="time" className="cemex-input" style={inputStyle} value={horaTermino} onChange={e => setHoraTermino(e.target.value)} /></div>
+          <div><label htmlFor="camion-rev" style={labelStyle}>Rev</label><input id="camion-rev" className="cemex-input" style={inputStyle} placeholder="11" value={rev} onChange={e => setRev(e.target.value)} /></div>
+          <div><label htmlFor="camion-temp" style={labelStyle}>Temp. Concreto (°C)</label><input id="camion-temp" className="cemex-input" style={inputStyle} placeholder="31.3" value={temp} onChange={e => setTemp(e.target.value)} /></div>
+          <div><label htmlFor="camion-espera" style={labelStyle}>Espera Cliente</label><input id="camion-espera" className="cemex-input" style={inputStyle} placeholder="0 mins" value={espera} onChange={e => setEspera(e.target.value)} /></div>
         </div>
         <button
           onClick={handleSave}
