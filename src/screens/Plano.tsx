@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import { useAppStore } from '../context/AppContext'
 import { zonasMapa } from '../data'
 import StripeBar from '../components/StripeBar'
@@ -8,6 +8,40 @@ import DrawRectOverlay from '../components/DrawRectOverlay'
 import MapeoOverlay from '../components/MapeoOverlay'
 import CRPickerSheet from '../components/CRPickerSheet'
 import type { AreaRect, Marker, Muestra } from '../types'
+
+// ── Crop calculation hook (same as MapeoOverlay) ─────────────────────────────
+function useCrop(planoDataUrl: string, area: AreaRect | null) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [crop, setCrop] = useState<{ imgW: number; imgH: number; imgX: number; imgY: number; boxH: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!planoDataUrl || !area || !wrapperRef.current) return
+    const boxW = wrapperRef.current.offsetWidth
+    if (boxW === 0) return
+
+    const img = new Image()
+    img.onload = () => {
+      const natW = img.naturalWidth
+      const natH = img.naturalHeight
+      const fullImgW = boxW / (area.w / 100)
+      const fullImgH = fullImgW * (natH / natW)
+      const areaRenderedH = (area.h / 100) * fullImgH
+      const maxH = window.innerHeight * 0.7
+      let imgW = fullImgW, imgH = fullImgH, boxH = areaRenderedH
+      if (areaRenderedH > maxH) {
+        const scale = maxH / areaRenderedH
+        imgW = fullImgW * scale
+        imgH = fullImgH * scale
+        boxH = maxH
+      }
+      setCrop({ imgW, imgH, imgX: -(area.x / 100) * imgW, imgY: -(area.y / 100) * imgH, boxH })
+    }
+    img.src = planoDataUrl
+    return () => { img.onload = null }
+  }, [planoDataUrl, area?.x, area?.y, area?.w, area?.h])
+
+  return { wrapperRef, crop }
+}
 
 interface Props {
   onNavigate: (screen: string) => void
@@ -111,23 +145,40 @@ function MuestraModal({ muestra, onSave, onDelete, onClose }: MuestraModalProps)
   )
 }
 
-// ── Overlay de taps sobre el plano completo para muestras ───────────────────
+// ── Overlay de taps sobre el área ampliada para muestras ────────────────────
 interface MuestrasOverlayProps {
   planoDataUrl: string
+  area: AreaRect | null
   muestras: Muestra[]
   onTap: (x: number, y: number) => void
   onPressMuestra: (id: string) => void
 }
 
-function MuestrasOverlay({ planoDataUrl, muestras, onTap, onPressMuestra }: MuestrasOverlayProps) {
+function MuestrasOverlay({ planoDataUrl, area, muestras, onTap, onPressMuestra }: MuestrasOverlayProps) {
   const downRef = useRef<{ x: number; y: number; t: number } | null>(null)
+  const { wrapperRef, crop } = useCrop(planoDataUrl, area)
 
   return (
-    <div style={{ position: 'relative', borderRadius: brand.radiusMd, overflow: 'hidden', boxShadow: brand.shadowMd }}>
-      <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none', pointerEvents: 'none' }} />
+    <div
+      ref={wrapperRef}
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: crop ? `${crop.boxH}px` : 'auto',
+        overflow: 'hidden',
+        borderRadius: 14,
+        background: '#E9ECEF',
+        boxShadow: brand.shadowMd,
+      }}
+    >
+      {crop ? (
+        <img src={planoDataUrl} alt="Plano" draggable={false} style={{ position: 'absolute', width: `${crop.imgW}px`, height: `${crop.imgH}px`, maxWidth: 'none', left: `${crop.imgX}px`, top: `${crop.imgY}px`, userSelect: 'none', pointerEvents: 'none' }} />
+      ) : (
+        <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none', pointerEvents: 'none' }} />
+      )}
 
       <div
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: 0, touchAction: 'pan-y' }}
         onPointerDown={(e) => { downRef.current = { x: e.clientX, y: e.clientY, t: Date.now() } }}
         onPointerUp={(e) => {
           if (!downRef.current) return
@@ -380,11 +431,14 @@ export default function Plano({ onNavigate }: Props) {
                 <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
                   {muestras.length > 0
                     ? `${muestras.length} muestra${muestras.length !== 1 ? 's' : ''} registrada${muestras.length !== 1 ? 's' : ''} · Toca un pin para ver/editar`
-                    : 'Toca el plano para registrar una muestra'}
+                    : activeArea
+                      ? 'Toca el área para registrar una muestra'
+                      : 'Toca el plano para registrar una muestra'}
                 </p>
 
                 <MuestrasOverlay
                   planoDataUrl={planoDataUrl}
+                  area={activeArea}
                   muestras={muestras}
                   onTap={handleMuestraTap}
                   onPressMuestra={(id) => {

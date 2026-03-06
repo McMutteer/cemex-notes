@@ -45,7 +45,7 @@ export default function Dashboard({ online, onNavigate }: Props) {
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.45)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8 }}>Organización</p>
-              <p style={{ margin: 0, fontSize: 13, color: brand.white, fontWeight: 700 }}>CEMEX México</p>
+              <p style={{ margin: 0, fontSize: 13, color: brand.white, fontWeight: 700 }}>CEMEX Aguascalientes</p>
             </div>
             <span style={{ fontSize: 10, background: 'rgba(223,52,61,0.85)', color: brand.white, padding: '3px 10px', borderRadius: 20, fontWeight: 700, letterSpacing: 1.2, flexShrink: 0 }}>DIRECTOR</span>
           </div>

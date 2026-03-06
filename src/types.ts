@@ -1,6 +1,15 @@
 export type ProjectId = string
 export type SessionId = string
 
+export interface MiembroEquipo {
+  id: string
+  nombre: string
+  rol: string
+  iniciales: string
+  empresa: string
+  externo: boolean
+}
+
 export interface Proyecto {
   id: ProjectId
   nombre: string
@@ -9,6 +18,7 @@ export interface Proyecto {
   coordinador: string
   planoDataUrl: string | null
   creadoEn: string
+  equipo?: MiembroEquipo[]
 }
 
 export interface Sesion {
@@ -119,6 +129,8 @@ export interface AppContextValue extends AppState {
   addFoto: (sesionId: SessionId, foto: FotoEvidencia) => void
   updateFoto: (sesionId: SessionId, fotoId: string, patch: Partial<FotoEvidencia>) => void
   removeFoto: (sesionId: SessionId, fotoId: string) => void
+  addMiembroEquipo: (proyectoId: ProjectId, miembro: MiembroEquipo) => void
+  removeMiembroEquipo: (proyectoId: ProjectId, miembroId: string) => void
   activeProyectoId: ProjectId | null
   activeSessionId: SessionId | null
   setActiveProyectoId: (id: ProjectId | null) => void

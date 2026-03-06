@@ -11,11 +11,38 @@ interface Props {
   onNavigate: (screen: string) => void
 }
 
+const CATALOGO_MI_EQUIPO = [
+  { nombre: 'Ing. Marcos Fuentes', rol: 'Coordinador CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Patricia Olvera', rol: 'Supervisora de Calidad', empresa: 'CEMEX' },
+  { nombre: 'Ing. Sofía Ramírez', rol: 'Coordinadora CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Alejandro Vidal', rol: 'Control de Calidad', empresa: 'CEMEX' },
+  { nombre: 'Daniela Mora', rol: 'Supervisora CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Ing. Gustavo Herrera', rol: 'Coordinador CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Lorena Ibáñez', rol: 'Ingeniera de Proyecto', empresa: 'CEMEX' },
+  { nombre: 'Héctor Sandoval', rol: 'Técnico de Laboratorio', empresa: 'CEMEX' },
+]
+
+const AVATAR_COLORS = [
+  { color: brand.navy, bg: brand.navyLight },
+  { color: brand.red, bg: '#FEF2F2' },
+  { color: brand.success, bg: brand.successLight },
+  { color: '#7C3AED', bg: '#F5F3FF' },
+  { color: '#0284C7', bg: '#F0F9FF' },
+]
+
+function avatarColor(index: number, externo: boolean) {
+  if (externo) return { color: brand.gray600, bg: brand.surfaceMuted }
+  return AVATAR_COLORS[index % AVATAR_COLORS.length]
+}
+
 export default function Proyecto({ onNavigate }: Props) {
-  const { proyectos, sesiones, activeProyectoId, setActiveSessionId, addSesion } = useAppStore()
+  const { proyectos, sesiones, activeProyectoId, setActiveSessionId, addSesion, addMiembroEquipo, removeMiembroEquipo } = useAppStore()
   const [activeTab, setActiveTab] = useState<'sesiones' | 'plano' | 'equipo'>('sesiones')
   const [showNuevaSesionModal, setShowNuevaSesionModal] = useState(false)
   const [volProgInput, setVolProgInput] = useState('')
+  const [showAgregarMiembro, setShowAgregarMiembro] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
+  const [rolExterno, setRolExterno] = useState('')
 
   const todayISO = new Date().toISOString().split('T')[0]
   const [fechaInput, setFechaInput] = useState(todayISO)
@@ -39,13 +66,16 @@ export default function Proyecto({ onNavigate }: Props) {
   }
 
   const handleCrearSesion = () => {
-    if (!activeProyectoId || !fechaInput) return
+    if (!activeProyectoId || !fechaInput || !volProgInput) return
+    // Parse date parts manually to avoid UTC offset shifting the day
+    const [year, month, day] = fechaInput.split('-').map(Number)
+    const dateLocal = new Date(year, month - 1, day)
     const nuevaSesion: Sesion = {
       id: crypto.randomUUID(),
       proyectoId: activeProyectoId,
-      fecha: new Date(fechaInput).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
+      fecha: dateLocal.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
       fechaISO: fechaInput,
-      volumenProgramado: Number(volProgInput) || 0,
+      volumenProgramado: Number(volProgInput),
       volumenReal: 0,
       estado: 'En curso',
       areaDefinida: null,
@@ -211,24 +241,30 @@ export default function Proyecto({ onNavigate }: Props) {
         {activeTab === 'equipo' && (
           <>
             <span style={{ ...brand.textLabel, color: brand.gray400, display: 'block', marginBottom: 10 }}>Miembros del equipo</span>
-            {[
-              { nombre: 'Carlos Mendoza', rol: 'Residente de Obra', iniciales: 'CM', color: brand.navy, bg: brand.navyLight, activo: true },
-              { nombre: 'Laura Jiménez', rol: 'Supervisora CEMEX', iniciales: 'LJ', color: brand.red, bg: '#FEF2F2', activo: true },
-              { nombre: 'Ing. Roberto Solis', rol: 'Control de Calidad', iniciales: 'RS', color: brand.success, bg: brand.successLight, activo: false },
-            ].map((m) => (
-              <div key={m.nombre} style={{ background: brand.surface, borderRadius: brand.radiusLg, padding: '14px', boxShadow: brand.shadowXs, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: brand.radiusMd, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: m.color }}>{m.iniciales}</span>
+            {(proyecto?.equipo ?? []).map((m, i) => {
+              const ac = avatarColor(i, m.externo)
+              return (
+                <div key={m.id} style={{ background: brand.surface, borderRadius: brand.radiusLg, padding: '14px', boxShadow: brand.shadowXs, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: brand.radiusMd, background: ac.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: ac.color }}>{m.iniciales}</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{m.nombre}</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 11, color: brand.gray400 }}>{m.rol} {m.externo && <span style={{ color: brand.gray300 }}>· Externo</span>}</p>
+                  </div>
+                  <button
+                    onClick={() => activeProyectoId && removeMiembroEquipo(activeProyectoId, m.id)}
+                    style={{ background: brand.surfaceSubtle, border: 'none', borderRadius: 20, width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: brand.gray400, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  >×</button>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{m.nombre}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 11, color: brand.gray400 }}>{m.rol}</p>
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: m.activo ? brand.successLight : brand.surfaceSubtle, color: m.activo ? brand.successText : brand.gray400 }}>
-                  {m.activo ? 'Activo' : 'Inactivo'}
-                </span>
-              </div>
-            ))}
+              )
+            })}
+            <button
+              onClick={() => { setBusqueda(''); setRolExterno(''); setShowAgregarMiembro(true) }}
+              style={{ width: '100%', background: brand.surfaceMuted, border: `1.5px dashed ${brand.border}`, borderRadius: brand.radiusLg, padding: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: brand.navy, fontWeight: 700, fontSize: 13, marginTop: 4 }}
+            >
+              <IconPlus size={16} color={brand.navy} /> Agregar miembro
+            </button>
           </>
         )}
 
@@ -253,7 +289,7 @@ export default function Proyecto({ onNavigate }: Props) {
               />
             </div>
             <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: brand.gray400, textTransform: 'uppercase', letterSpacing: 0.8, display: 'block', marginBottom: 6 }}>Volumen programado (m³)</label>
+              <label style={{ fontSize: 10, fontWeight: 700, color: brand.gray400, textTransform: 'uppercase', letterSpacing: 0.8, display: 'block', marginBottom: 6 }}>Volumen programado (m³) <span style={{ color: brand.red }}>*</span></label>
               <input
                 type="number"
                 className="cemex-input"
@@ -265,14 +301,116 @@ export default function Proyecto({ onNavigate }: Props) {
             </div>
             <button
               onClick={handleCrearSesion}
-              disabled={!fechaInput}
-              style={{ width: '100%', background: fechaInput ? brand.gradientHeader : brand.gray300, color: brand.white, border: 'none', borderRadius: brand.radiusLg, padding: '14px', fontWeight: 700, fontSize: 14, cursor: fechaInput ? 'pointer' : 'not-allowed', boxShadow: fechaInput ? brand.shadowSm : brand.shadowNone }}
+              disabled={!fechaInput || !volProgInput}
+              style={{ width: '100%', background: (fechaInput && volProgInput) ? brand.gradientHeader : brand.gray300, color: brand.white, border: 'none', borderRadius: brand.radiusLg, padding: '14px', fontWeight: 700, fontSize: 14, cursor: (fechaInput && volProgInput) ? 'pointer' : 'not-allowed', boxShadow: (fechaInput && volProgInput) ? brand.shadowSm : brand.shadowNone }}
             >
               Crear sesión
             </button>
           </div>
         </div>
       )}
+
+      {/* Agregar miembro sheet */}
+      {showAgregarMiembro && activeProyectoId && (() => {
+        const equipoActual = proyecto?.equipo ?? []
+        const nombresActuales = equipoActual.map(m => m.nombre.toLowerCase())
+        const catalogoFiltrado = CATALOGO_MI_EQUIPO.filter(m =>
+          !nombresActuales.includes(m.nombre.toLowerCase()) &&
+          (busqueda === '' || m.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+        )
+        const busquedaTrimmed = busqueda.trim()
+        const noCoincideCatalogo = busquedaTrimmed.length > 0 &&
+          !CATALOGO_MI_EQUIPO.some(m => m.nombre.toLowerCase().includes(busquedaTrimmed.toLowerCase()))
+
+        const handleAddCatalogo = (nombre: string, rol: string, empresa: string) => {
+          const iniciales = nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+          addMiembroEquipo(activeProyectoId, { id: crypto.randomUUID(), nombre, rol, iniciales, empresa, externo: false })
+          setShowAgregarMiembro(false)
+        }
+
+        const handleAddExterno = () => {
+          if (!busquedaTrimmed) return
+          const iniciales = busquedaTrimmed.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+          addMiembroEquipo(activeProyectoId, { id: crypto.randomUUID(), nombre: busquedaTrimmed, rol: rolExterno || 'Colaborador', iniciales, empresa: 'Externo', externo: true })
+          setShowAgregarMiembro(false)
+        }
+
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
+            <div style={{ width: '100%', background: brand.surface, borderRadius: `${brand.radius2xl}px ${brand.radius2xl}px 0 0`, padding: '24px 20px 36px', boxShadow: '0 -8px 32px rgba(41,48,100,0.14)', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: brand.gray800 }}>Agregar miembro</h3>
+                <button onClick={() => setShowAgregarMiembro(false)} style={{ background: brand.surfaceSubtle, border: 'none', borderRadius: 20, width: 32, height: 32, cursor: 'pointer', fontSize: 16, color: brand.gray500 }}>×</button>
+              </div>
+
+              {/* Buscador */}
+              <input
+                className="cemex-input"
+                type="text"
+                placeholder="Buscar persona..."
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: brand.radiusMd, border: `1.5px solid ${brand.border}`, fontSize: 14, color: brand.gray800, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: 16 }}
+              />
+
+              <div style={{ overflowY: 'auto', flex: 1 }}>
+                {/* Mi Equipo */}
+                {catalogoFiltrado.length > 0 && (
+                  <>
+                    <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, color: brand.gray400, textTransform: 'uppercase', letterSpacing: 0.8 }}>Mi Equipo</p>
+                    {catalogoFiltrado.map((m) => (
+                      <button
+                        key={m.nombre}
+                        onClick={() => handleAddCatalogo(m.nombre, m.rol, m.empresa)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, background: brand.surfaceMuted, borderRadius: brand.radiusMd, border: `1.5px solid ${brand.borderLight}`, padding: '12px 14px', cursor: 'pointer', textAlign: 'left', marginBottom: 8 }}
+                      >
+                        <div style={{ width: 40, height: 40, borderRadius: brand.radiusMd, background: brand.navyLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: brand.navy }}>{m.nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()}</span>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{m.nombre}</p>
+                          <p style={{ margin: '2px 0 0', fontSize: 11, color: brand.gray400 }}>{m.rol} · {m.empresa}</p>
+                        </div>
+                        <IconPlus size={16} color={brand.navy} />
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {/* Externo */}
+                {noCoincideCatalogo && (
+                  <>
+                    <p style={{ margin: '12px 0 8px', fontSize: 10, fontWeight: 700, color: brand.gray400, textTransform: 'uppercase', letterSpacing: 0.8 }}>Otros equipos</p>
+                    <div style={{ background: brand.surfaceMuted, borderRadius: brand.radiusMd, border: `1.5px solid ${brand.borderLight}`, padding: '14px' }}>
+                      <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{busquedaTrimmed}</p>
+                      <input
+                        className="cemex-input"
+                        type="text"
+                        placeholder="Rol / puesto (ej. Supervisor)"
+                        value={rolExterno}
+                        onChange={e => setRolExterno(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: brand.radiusSm, border: `1.5px solid ${brand.border}`, fontSize: 13, color: brand.gray800, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: 10 }}
+                      />
+                      <button
+                        onClick={handleAddExterno}
+                        style={{ width: '100%', background: brand.gradientHeader, color: brand.white, border: 'none', borderRadius: brand.radiusMd, padding: '10px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                      >
+                        Agregar {busquedaTrimmed}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {catalogoFiltrado.length === 0 && !noCoincideCatalogo && (
+                  <p style={{ textAlign: 'center', color: brand.gray300, fontSize: 13, marginTop: 20 }}>
+                    {busqueda ? 'Sin resultados' : 'Todos los miembros del catálogo ya están en el equipo'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
