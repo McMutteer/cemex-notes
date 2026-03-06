@@ -12,11 +12,14 @@ interface Props {
 }
 
 const CATALOGO_MI_EQUIPO = [
-  { nombre: 'Carlos Mendoza', rol: 'Residente de Obra', empresa: 'CEMEX' },
-  { nombre: 'Laura Jiménez', rol: 'Supervisora CEMEX', empresa: 'CEMEX' },
-  { nombre: 'Ing. Roberto Solis', rol: 'Control de Calidad', empresa: 'CEMEX' },
-  { nombre: 'Ana Torres', rol: 'Ingeniera de Proyecto', empresa: 'CEMEX' },
-  { nombre: 'Marco Reyes', rol: 'Operador de Planta', empresa: 'CEMEX' },
+  { nombre: 'Ing. Marcos Fuentes', rol: 'Coordinador CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Patricia Olvera', rol: 'Supervisora de Calidad', empresa: 'CEMEX' },
+  { nombre: 'Ing. Sofía Ramírez', rol: 'Coordinadora CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Alejandro Vidal', rol: 'Control de Calidad', empresa: 'CEMEX' },
+  { nombre: 'Daniela Mora', rol: 'Supervisora CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Ing. Gustavo Herrera', rol: 'Coordinador CEMEX', empresa: 'CEMEX' },
+  { nombre: 'Lorena Ibáñez', rol: 'Ingeniera de Proyecto', empresa: 'CEMEX' },
+  { nombre: 'Héctor Sandoval', rol: 'Técnico de Laboratorio', empresa: 'CEMEX' },
 ]
 
 const AVATAR_COLORS = [
