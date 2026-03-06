@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import type { AppContextValue, AppState, Proyecto, Sesion, SessionId, AreaRect, Marker, ProjectId, CamionCR, Muestra, FotoEvidencia } from '../types'
+import type { AppContextValue, AppState, Proyecto, Sesion, SessionId, AreaRect, Marker, ProjectId, CamionCR, Muestra, FotoEvidencia, MiembroEquipo } from '../types'
 import { proyecto as seedProyecto, sesionActual as seedSesion, camiones as seedCamiones } from '../data'
 
-const STORAGE_KEY = 'cemex_app_state_v2'
+const STORAGE_KEY = 'cemex_app_state_v4'
 
 function buildSeedState(): AppState {
   const p: Proyecto = {
@@ -14,6 +14,11 @@ function buildSeedState(): AppState {
     coordinador: seedProyecto.coordinador,
     planoDataUrl: null,
     creadoEn: '2024-10-01T00:00:00.000Z',
+    equipo: [
+      { id: 'eq-1', nombre: 'Carlos Mendoza', rol: 'Residente de Obra', iniciales: 'CM', empresa: 'CEMEX', externo: false },
+      { id: 'eq-2', nombre: 'Laura Jiménez', rol: 'Supervisora CEMEX', iniciales: 'LJ', empresa: 'CEMEX', externo: false },
+      { id: 'eq-3', nombre: 'Ing. Roberto Solis', rol: 'Control de Calidad', iniciales: 'RS', empresa: 'CEMEX', externo: false },
+    ],
   }
   const sesiones: Sesion[] = [
     { id: 's-25oct', proyectoId: p.id, fecha: '25/Oct/2024', fechaISO: '2024-10-25', volumenProgramado: 167, volumenReal: 161, estado: 'Completado', areaDefinida: null, markers: [], camiones: [], muestras: [], fotos: [] },
@@ -152,10 +157,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       )
     )
 
+  const addMiembroEquipo = (proyectoId: ProjectId, miembro: MiembroEquipo) =>
+    setProyectos(prev =>
+      prev.map(p => p.id === proyectoId
+        ? { ...p, equipo: [...(p.equipo ?? []), miembro] }
+        : p
+      )
+    )
+
+  const removeMiembroEquipo = (proyectoId: ProjectId, miembroId: string) =>
+    setProyectos(prev =>
+      prev.map(p => p.id === proyectoId
+        ? { ...p, equipo: (p.equipo ?? []).filter(m => m.id !== miembroId) }
+        : p
+      )
+    )
+
   return (
     <AppContext.Provider value={{
       proyectos, sesiones,
-      addProyecto, addSesion, updateSesion, setAreaDefinida, addMarker, removeMarker, addCamion, updateCamion, removeCamion, addMuestra, updateMuestra, removeMuestra, addFoto, updateFoto, removeFoto,
+      addProyecto, addSesion, updateSesion, setAreaDefinida, addMarker, removeMarker, addCamion, updateCamion, removeCamion, addMuestra, updateMuestra, removeMuestra, addFoto, updateFoto, removeFoto, addMiembroEquipo, removeMiembroEquipo,
       activeProyectoId, activeSessionId, setActiveProyectoId, setActiveSessionId,
     }}>
       {children}
