@@ -1,0 +1,527 @@
+import { useState, useRef, useLayoutEffect } from 'react'
+import { useAppStore } from '../context/AppContext'
+import { zonasMapa } from '../data'
+import StripeBar from '../components/StripeBar'
+import { IconBack, IconCamera, IconMap } from '../components/Icons'
+import { brand } from '../brand'
+import DrawRectOverlay from '../components/DrawRectOverlay'
+import MapeoOverlay from '../components/MapeoOverlay'
+import CRPickerSheet from '../components/CRPickerSheet'
+import type { AreaRect, Marker, Muestra } from '../types'
+
+// ── Crop calculation hook (same as MapeoOverlay) ─────────────────────────────
+function useCrop(planoDataUrl: string, area: AreaRect | null) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [crop, setCrop] = useState<{ imgW: number; imgH: number; imgX: number; imgY: number; boxH: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!planoDataUrl || !area || !wrapperRef.current) return
+    const boxW = wrapperRef.current.offsetWidth
+    if (boxW === 0) return
+
+    const img = new Image()
+    img.onload = () => {
+      const natW = img.naturalWidth
+      const natH = img.naturalHeight
+      const fullImgW = boxW / (area.w / 100)
+      const fullImgH = fullImgW * (natH / natW)
+      const areaRenderedH = (area.h / 100) * fullImgH
+      const maxH = window.innerHeight * 0.7
+      let imgW = fullImgW, imgH = fullImgH, boxH = areaRenderedH
+      if (areaRenderedH > maxH) {
+        const scale = maxH / areaRenderedH
+        imgW = fullImgW * scale
+        imgH = fullImgH * scale
+        boxH = maxH
+      }
+      setCrop({ imgW, imgH, imgX: -(area.x / 100) * imgW, imgY: -(area.y / 100) * imgH, boxH })
+    }
+    img.src = planoDataUrl
+    return () => { img.onload = null }
+  }, [planoDataUrl, area?.x, area?.y, area?.w, area?.h])
+
+  return { wrapperRef, crop }
+}
+
+interface Props {
+  onNavigate: (screen: string) => void
+}
+
+// ── Modal para agregar/ver foto de muestra ──────────────────────────────────
+interface MuestraModalProps {
+  muestra?: Muestra
+  onSave: (etiqueta: string, imageDataUrl: string | null) => void
+  onDelete?: () => void
+  onClose: () => void
+}
+
+function MuestraModal({ muestra, onSave, onDelete, onClose }: MuestraModalProps) {
+  const [etiqueta, setEtiqueta] = useState(muestra?.etiqueta ?? '')
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(muestra?.imageDataUrl ?? null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => setImageDataUrl(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const isNew = !muestra
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
+      <div style={{ width: '100%', background: brand.surface, borderRadius: `${brand.radius2xl}px ${brand.radius2xl}px 0 0`, padding: '20px 20px 32px', maxHeight: '88vh', overflowY: 'auto', boxShadow: '0 -8px 32px rgba(41,48,100,0.14)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ width: 4, height: 20, background: '#7C3AED', borderRadius: 2 }} />
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: brand.gray800 }}>
+              {isNew ? 'Nueva muestra' : 'Muestra'}
+            </h2>
+          </div>
+          <button onClick={onClose} style={{ background: brand.surfaceSubtle, border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: brand.gray500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 10, color: brand.gray400, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 4 }}>Etiqueta / referencia</label>
+          <input
+            className="cemex-input"
+            style={{ width: '100%', background: brand.surfaceMuted, border: `1.5px solid ${brand.border}`, borderRadius: brand.radiusMd, padding: '10px 12px', fontSize: 13, fontWeight: 600, color: brand.gray800, boxSizing: 'border-box', fontFamily: 'inherit' }}
+            placeholder="Ej. M-1, Zona norte..."
+            value={etiqueta}
+            onChange={e => setEtiqueta(e.target.value)}
+          />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 10, color: brand.gray400, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 8 }}>Evidencia fotográfica</label>
+          {imageDataUrl ? (
+            <div style={{ position: 'relative' }}>
+              <img src={imageDataUrl} alt="Muestra" style={{ width: '100%', borderRadius: brand.radiusMd, display: 'block', maxHeight: 220, objectFit: 'cover' }} />
+              <button
+                onClick={() => setImageDataUrl(null)}
+                style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 28, height: 28, color: brand.white, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >✕</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => { if (fileRef.current) { fileRef.current.accept = 'image/*'; fileRef.current.capture = ''; fileRef.current.click() } }}
+                style={{ flex: 1, border: `1.5px dashed ${brand.border}`, borderRadius: brand.radiusMd, padding: '16px 8px', background: brand.surfaceMuted, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: brand.gray400, fontSize: 12, fontWeight: 600 }}
+              >
+                <IconCamera size={20} color={brand.gray400} />
+                Galería
+              </button>
+              <button
+                onClick={() => { if (fileRef.current) { fileRef.current.accept = 'image/*'; fileRef.current.capture = 'environment'; fileRef.current.click() } }}
+                style={{ flex: 1, border: `1.5px dashed ${brand.border}`, borderRadius: brand.radiusMd, padding: '16px 8px', background: brand.surfaceMuted, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: brand.gray400, fontSize: 12, fontWeight: 600 }}
+              >
+                <IconCamera size={20} color={brand.gray400} />
+                Cámara
+              </button>
+              <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={handleFile} />
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => { onSave(etiqueta, imageDataUrl); onClose() }}
+          style={{ width: '100%', background: '#7C3AED', color: brand.white, borderRadius: brand.radiusLg, border: 'none', cursor: 'pointer', padding: '14px', fontSize: 13, fontWeight: 700, marginBottom: onDelete ? 8 : 0, boxShadow: brand.shadowSm }}
+        >
+          {isNew ? 'Guardar muestra' : 'Guardar cambios'}
+        </button>
+
+        {onDelete && (
+          <button
+            onClick={() => { onDelete(); onClose() }}
+            style={{ width: '100%', background: 'none', color: brand.red, borderRadius: brand.radiusLg, border: 'none', cursor: 'pointer', padding: '10px', fontSize: 13, fontWeight: 700 }}
+          >
+            Eliminar muestra
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Overlay de taps sobre el área ampliada para muestras ────────────────────
+interface MuestrasOverlayProps {
+  planoDataUrl: string
+  area: AreaRect | null
+  muestras: Muestra[]
+  onTap: (x: number, y: number) => void
+  onPressMuestra: (id: string) => void
+}
+
+function MuestrasOverlay({ planoDataUrl, area, muestras, onTap, onPressMuestra }: MuestrasOverlayProps) {
+  const downRef = useRef<{ x: number; y: number; t: number } | null>(null)
+  const { wrapperRef, crop } = useCrop(planoDataUrl, area)
+
+  return (
+    <div
+      ref={wrapperRef}
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: crop ? `${crop.boxH}px` : 'auto',
+        overflow: 'hidden',
+        borderRadius: 14,
+        background: '#E9ECEF',
+        boxShadow: brand.shadowMd,
+      }}
+    >
+      {crop ? (
+        <img src={planoDataUrl} alt="Plano" draggable={false} style={{ position: 'absolute', width: `${crop.imgW}px`, height: `${crop.imgH}px`, maxWidth: 'none', left: `${crop.imgX}px`, top: `${crop.imgY}px`, userSelect: 'none', pointerEvents: 'none' }} />
+      ) : (
+        <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none', pointerEvents: 'none' }} />
+      )}
+
+      <div
+        style={{ position: 'absolute', inset: 0, touchAction: 'pan-y' }}
+        onPointerDown={(e) => { downRef.current = { x: e.clientX, y: e.clientY, t: Date.now() } }}
+        onPointerUp={(e) => {
+          if (!downRef.current) return
+          const dx = Math.abs(e.clientX - downRef.current.x)
+          const dy = Math.abs(e.clientY - downRef.current.y)
+          const dt = Date.now() - downRef.current.t
+          if (dx < 8 && dy < 8 && dt < 400) {
+            const rect = e.currentTarget.getBoundingClientRect()
+            onTap((e.clientX - rect.left) / rect.width * 100, (e.clientY - rect.top) / rect.height * 100)
+          }
+          downRef.current = null
+        }}
+      />
+
+      {muestras.map((m) => (
+        <button
+          key={m.id}
+          onClick={(e) => { e.stopPropagation(); onPressMuestra(m.id) }}
+          style={{
+            position: 'absolute',
+            left: `${m.x}%`,
+            top: `${m.y}%`,
+            transform: 'translate(-50%, -100%) rotate(-45deg)',
+            width: 28,
+            height: 28,
+            borderRadius: '50% 50% 50% 0',
+            background: '#7C3AED',
+            border: '2px solid #fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+            padding: 0,
+          }}
+        >
+          <span style={{ transform: 'rotate(45deg)', color: '#fff', fontSize: 12, lineHeight: 1 }}>M</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ── Pantalla principal ──────────────────────────────────────────────────────
+export default function Plano({ onNavigate }: Props) {
+  const { sesiones, proyectos, activeSessionId, activeProyectoId, setAreaDefinida, addMarker, removeMarker, addMuestra, updateMuestra, removeMuestra } = useAppStore()
+  const [tab, setTab] = useState<'area' | 'mapeo' | 'muestras'>('area')
+  const [pickerPending, setPickerPending] = useState<{ x: number; y: number } | null>(null)
+  const [muestraPending, setMuestraPending] = useState<{ x: number; y: number } | null>(null)
+  const [editingMuestra, setEditingMuestra] = useState<Muestra | null>(null)
+
+  const sesion = sesiones.find(s => s.id === activeSessionId)
+  const proyecto = proyectos.find(p => p.id === activeProyectoId)
+  const planoDataUrl = proyecto?.planoDataUrl ?? null
+  const activeArea = sesion?.areaDefinida ?? null
+  const muestras = sesion?.muestras ?? []
+
+  const handleConfirmArea = (rect: AreaRect) => {
+    if (!activeSessionId) return
+    setAreaDefinida(activeSessionId, rect)
+  }
+
+  const handleTap = (x: number, y: number) => {
+    setPickerPending({ x, y })
+  }
+
+  const handlePickCR = (cr: string) => {
+    if (!activeSessionId || !pickerPending) return
+    const marker: Marker = { id: crypto.randomUUID(), cr, x: pickerPending.x, y: pickerPending.y }
+    addMarker(activeSessionId, marker)
+    setPickerPending(null)
+  }
+
+  const handleRemoveMarker = (markerId: string) => {
+    if (!activeSessionId) return
+    removeMarker(activeSessionId, markerId)
+  }
+
+  const handleMuestraTap = (x: number, y: number) => {
+    setMuestraPending({ x, y })
+  }
+
+  const handleSaveMuestra = (etiqueta: string, imageDataUrl: string | null) => {
+    if (!activeSessionId || !muestraPending) return
+    const m: Muestra = {
+      id: crypto.randomUUID(),
+      x: muestraPending.x,
+      y: muestraPending.y,
+      etiqueta: etiqueta || `M-${muestras.length + 1}`,
+      imageDataUrl,
+      creadaEn: new Date().toISOString(),
+    }
+    addMuestra(activeSessionId, m)
+    setMuestraPending(null)
+  }
+
+  const handleUpdateMuestra = (id: string, etiqueta: string, imageDataUrl: string | null) => {
+    if (!activeSessionId) return
+    updateMuestra(activeSessionId, id, { etiqueta, imageDataUrl })
+    setEditingMuestra(null)
+  }
+
+  const handleDeleteMuestra = (id: string) => {
+    if (!activeSessionId) return
+    removeMuestra(activeSessionId, id)
+    setEditingMuestra(null)
+  }
+
+  const camionesParaPicker = (sesion?.camiones ?? []).map(c => ({ id: c.id, cr: c.cr }))
+
+  const tabs: Array<{ key: 'area' | 'mapeo' | 'muestras'; label: string }> = [
+    { key: 'area', label: 'Área' },
+    { key: 'mapeo', label: 'Mapeo' },
+    { key: 'muestras', label: 'Muestras' },
+  ]
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: brand.surfaceSubtle, position: 'relative' }}>
+      {/* Header */}
+      <div style={{ background: brand.gradientHeaderAccent, paddingBottom: 18, position: 'relative', overflow: 'hidden' }}>
+        <StripeBar />
+        <div style={{ padding: '10px 18px 0', position: 'relative' }}>
+          <button onClick={() => onNavigate('sesion')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: '4px 0', marginBottom: 8 }}>
+            <IconBack size={16} color="rgba(255,255,255,0.6)" /> Sesión {sesion?.fecha ?? ''}
+          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ width: 4, height: 22, background: brand.red, borderRadius: 2, flexShrink: 0 }} />
+            <h1 style={{ margin: 0, color: brand.white, fontSize: 18, fontWeight: 800 }}>Plano y Mapeo</h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div style={{ display: 'flex', margin: '12px 16px 0', background: brand.gray200, borderRadius: brand.radiusMd, padding: 4 }}>
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{ flex: 1, padding: '8px 0', fontSize: 12, fontWeight: 700, borderRadius: 9, border: 'none', cursor: 'pointer', background: tab === t.key ? brand.surface : 'transparent', color: tab === t.key ? brand.navy : brand.gray400, boxShadow: tab === t.key ? brand.shadowSm : brand.shadowNone, transition: 'all 0.15s' }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px' }}>
+
+        {/* ── TAB: ÁREA DE TRABAJO ── */}
+        {tab === 'area' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {planoDataUrl ? (
+              <>
+                <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
+                  {activeArea ? 'Área actual marcada · Arrastra para redefinir' : 'Arrastra sobre el plano para definir el área del día'}
+                </p>
+                <div style={{ position: 'relative', borderRadius: brand.radiusMd, overflow: 'hidden', boxShadow: brand.shadowSm }}>
+                  <img src={planoDataUrl} alt="Plano" draggable={false} style={{ width: '100%', display: 'block', userSelect: 'none' }} />
+                  <DrawRectOverlay existingRect={activeArea} onConfirm={handleConfirmArea} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: 3, background: '#4ade80', opacity: 0.7 }} />
+                    <span style={{ fontSize: 11, color: brand.gray500 }}>Colado</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: 3, background: brand.gray300 }} />
+                    <span style={{ fontSize: 11, color: brand.gray500 }}>Pendiente</span>
+                  </div>
+                </div>
+                <div style={{ background: brand.surface, borderRadius: brand.radiusLg, boxShadow: brand.shadowSm, overflow: 'hidden' }}>
+                  <svg viewBox="0 0 100 100" style={{ width: '100%', aspectRatio: '1/1', display: 'block' }}>
+                    <rect x="0" y="10" width="100" height="80" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.5" />
+                    <rect x="2" y="3" width="15" height="10" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.5" />
+                    <rect x="83" y="3" width="15" height="10" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.5" />
+                    {zonasMapa.map((z) => (
+                      <g key={z.id}>
+                        <rect x={z.x} y={z.y} width={z.w} height={z.h} fill={z.color} fillOpacity="0.5" stroke={z.color} strokeWidth="0.4" />
+                        {z.etiqueta.split('\n').map((line, li) => (
+                          <text key={li} x={z.x + z.w / 2} y={z.y + z.h / 2 + (li - 0.3) * 3.5} textAnchor="middle" fontSize="2.2" fill="#166534" fontWeight="600">{line}</text>
+                        ))}
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+                <p style={{ margin: 0, fontSize: 11, color: brand.gray400, textAlign: 'center' }}>
+                  Sube el plano al crear el proyecto para verlo aquí
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── TAB: MAPEO DEL DÍA ── */}
+        {tab === 'mapeo' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {activeArea && planoDataUrl ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
+                    {(sesion?.markers?.length ?? 0) > 0
+                      ? `${sesion!.markers.length} CR${sesion!.markers.length !== 1 ? 's' : ''} colocado${sesion!.markers.length !== 1 ? 's' : ''} · Toca para eliminar`
+                      : 'Toca el plano para colocar un CR'}
+                  </p>
+                  <button onClick={() => setTab('area')} style={{ fontSize: 11, fontWeight: 700, color: brand.navy, background: brand.navyLight, border: 'none', borderRadius: 20, padding: '4px 10px', cursor: 'pointer' }}>
+                    Editar área
+                  </button>
+                </div>
+                <MapeoOverlay planoDataUrl={planoDataUrl} area={activeArea} markers={sesion?.markers ?? []} onTap={handleTap} onRemoveMarker={handleRemoveMarker} />
+                {(sesion?.markers?.length ?? 0) > 0 && (
+                  <div style={{ background: brand.surface, borderRadius: brand.radiusMd, padding: '12px 14px', boxShadow: brand.shadowSm }}>
+                    <p style={{ margin: '0 0 10px', ...brand.textLabel, color: brand.gray400 }}>CRs registrados</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {sesion!.markers.map((m, i) => (
+                        <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: brand.navyLight, borderRadius: 20, padding: '4px 10px' }}>
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: brand.navy, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ color: brand.white, fontSize: 9, fontWeight: 800 }}>{i + 1}</span>
+                          </div>
+                          <span style={{ fontSize: 11, color: brand.gray800, fontWeight: 600 }}>CR {m.cr}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ background: brand.warningLight, borderRadius: brand.radiusMd, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <IconMap size={18} color={brand.warningText} />
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: brand.warningText }}>
+                    {!planoDataUrl ? 'Sin plano en este proyecto' : 'Área de trabajo no definida'}
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#B45309' }}>
+                    {!planoDataUrl ? 'El plano se sube al crear el proyecto. Ve a Dashboard → Nuevo Proyecto.' : 'Ve a "Área" y arrastra para definir la zona del día antes de mapear.'}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TAB: MUESTRAS ── */}
+        {tab === 'muestras' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {planoDataUrl ? (
+              <>
+                <p style={{ margin: 0, fontSize: 12, color: brand.gray500, fontWeight: 600 }}>
+                  {muestras.length > 0
+                    ? `${muestras.length} muestra${muestras.length !== 1 ? 's' : ''} registrada${muestras.length !== 1 ? 's' : ''} · Toca un pin para ver/editar`
+                    : activeArea
+                      ? 'Toca el área para registrar una muestra'
+                      : 'Toca el plano para registrar una muestra'}
+                </p>
+
+                <MuestrasOverlay
+                  planoDataUrl={planoDataUrl}
+                  area={activeArea}
+                  muestras={muestras}
+                  onTap={handleMuestraTap}
+                  onPressMuestra={(id) => {
+                    const m = muestras.find(m => m.id === id)
+                    if (m) setEditingMuestra(m)
+                  }}
+                />
+
+                {muestras.length > 0 && (
+                  <div>
+                    <p style={{ margin: '0 0 8px', ...brand.textLabel, color: brand.gray400 }}>Muestras tomadas</p>
+                    {muestras.map((m, i) => (
+                      <button
+                        key={m.id}
+                        onClick={() => setEditingMuestra(m)}
+                        style={{ width: '100%', background: brand.surface, borderRadius: brand.radiusMd, padding: 0, boxShadow: brand.shadowSm, marginBottom: 8, border: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', display: 'flex' }}
+                      >
+                        <div style={{ width: 72, height: 72, flexShrink: 0, background: m.imageDataUrl ? 'transparent' : '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {m.imageDataUrl
+                            ? <img src={m.imageDataUrl} alt="Muestra" style={{ width: 72, height: 72, objectFit: 'cover', display: 'block' }} />
+                            : <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 14, fontWeight: 800, color: '#7C3AED' }}>M</span></div>
+                          }
+                        </div>
+                        <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 20, height: 20, borderRadius: 6, background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <span style={{ color: brand.white, fontSize: 10, fontWeight: 800 }}>{i + 1}</span>
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: brand.gray800 }}>{m.etiqueta || `Muestra ${i + 1}`}</span>
+                          </div>
+                          <span style={{ fontSize: 10, color: brand.gray400, marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+                            {m.imageDataUrl ? 'Con foto · ' : 'Sin foto · '}
+                            Pos {m.x.toFixed(0)}%, {m.y.toFixed(0)}%
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
+                          <span style={{ fontSize: 16, color: brand.gray300 }}>›</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ background: '#F5F3FF', borderRadius: brand.radiusMd, padding: '16px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <IconCamera size={18} color="#7C3AED" />
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#5B21B6' }}>Sin plano en este proyecto</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#7C3AED' }}>El plano se sube al crear el proyecto para poder marcar muestras.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {pickerPending && camionesParaPicker.length > 0 && (
+        <CRPickerSheet camiones={camionesParaPicker} onPick={handlePickCR} onClose={() => setPickerPending(null)} />
+      )}
+      {pickerPending && camionesParaPicker.length === 0 && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }} onClick={() => setPickerPending(null)}>
+          <div style={{ width: '100%', background: brand.surface, borderRadius: `${brand.radius2xl}px ${brand.radius2xl}px 0 0`, padding: '24px 20px 36px', boxShadow: '0 -8px 32px rgba(41,48,100,0.14)' }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: brand.gray800 }}>Sin camiones registrados</p>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: brand.gray400 }}>Registra primero los CRs en "Camiones CR" antes de marcarlos en el plano.</p>
+          </div>
+        </div>
+      )}
+
+      {muestraPending && (
+        <MuestraModal
+          onSave={handleSaveMuestra}
+          onClose={() => setMuestraPending(null)}
+        />
+      )}
+
+      {editingMuestra && (
+        <MuestraModal
+          muestra={editingMuestra}
+          onSave={(etiqueta, imageDataUrl) => handleUpdateMuestra(editingMuestra.id, etiqueta, imageDataUrl)}
+          onDelete={() => handleDeleteMuestra(editingMuestra.id)}
+          onClose={() => setEditingMuestra(null)}
+        />
+      )}
+    </div>
+  )
+}
