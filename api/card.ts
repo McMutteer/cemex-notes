@@ -55,5 +55,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(204).end();
   }
 
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
   return res.json(card);
 }
