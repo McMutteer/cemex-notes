@@ -33,10 +33,33 @@ const card = {
         "Captura y organización de fotos con descripciones obligatorias",
     },
   ],
-  techStack: ["Vite", "React", "TypeScript", "Tailwind CSS"],
+  techStack: ["Vite", "React 19", "TypeScript", "Tailwind CSS v4"],
+  links: {
+    repo: "https://github.com/McMutteer/cemex-notes",
+  },
+  journey: [
+    {
+      skill: "baptism",
+      label: "Nombrado como C-Notes",
+      completedAt: "2026-03-05",
+    },
+    {
+      skill: "master-plan",
+      label: "13 pantallas de tracking de colados",
+      completedAt: "2026-03-05",
+    },
+    {
+      skill: "add-hub-service",
+      label: "Debut en el hub de nqual5",
+      completedAt: "2026-03-05",
+    },
+  ],
   brand: {
     primaryColor: "#DF343D",
     accentColor: "#293064",
+  },
+  meta: {
+    createdAt: "2026-03-05",
   },
 };
 
