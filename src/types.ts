@@ -1,6 +1,15 @@
 export type ProjectId = string
 export type SessionId = string
 
+export interface MiembroEquipo {
+  id: string
+  nombre: string
+  rol: string
+  iniciales: string
+  empresa: string
+  externo: boolean
+}
+
 export interface Proyecto {
   id: ProjectId
   nombre: string
@@ -9,6 +18,7 @@ export interface Proyecto {
   coordinador: string
   planoDataUrl: string | null
   creadoEn: string
+  equipo?: MiembroEquipo[]
 }
 
 export interface Sesion {
@@ -24,6 +34,7 @@ export interface Sesion {
   camiones: CamionCR[]
   muestras: Muestra[]
   fotos: FotoEvidencia[]
+  datosColado?: DatosColadoData
 }
 
 export interface AreaRect {
@@ -68,6 +79,35 @@ export interface CamionCR {
   esperaCliente: string
 }
 
+export interface DatosColadoData {
+  tipoProducto: string
+  fc: string
+  fcUnit: 'kg/cm2' | 'MPa'
+  espesor: string
+  frecuenciaMuestreo: string
+  slump: string
+  tamMaxAgregado: string
+  aditivos: string[]
+  pisero: string
+  laboratorio: string
+  coordinadorCemex: string
+  plantaOptima: string
+  cantidadCR: string
+  tiempoCiclo: string
+  estadiaObra: string
+  trayecto: string
+  naveCerrada: boolean
+  usaLaser: boolean
+  reglaVibratoria: boolean
+  bumpCutter: boolean
+  barreraViento: boolean
+  barreraVapor: boolean
+  agregaFibra: boolean
+  diamondDowel: boolean
+  pronosticoLluvia: boolean
+  notas: string
+}
+
 export interface AppState {
   proyectos: Proyecto[]
   sesiones: Sesion[]
@@ -89,6 +129,8 @@ export interface AppContextValue extends AppState {
   addFoto: (sesionId: SessionId, foto: FotoEvidencia) => void
   updateFoto: (sesionId: SessionId, fotoId: string, patch: Partial<FotoEvidencia>) => void
   removeFoto: (sesionId: SessionId, fotoId: string) => void
+  addMiembroEquipo: (proyectoId: ProjectId, miembro: MiembroEquipo) => void
+  removeMiembroEquipo: (proyectoId: ProjectId, miembroId: string) => void
   activeProyectoId: ProjectId | null
   activeSessionId: SessionId | null
   setActiveProyectoId: (id: ProjectId | null) => void
