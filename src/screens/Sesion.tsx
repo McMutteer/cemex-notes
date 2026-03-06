@@ -7,9 +7,9 @@ import SignaturePad from '../components/SignaturePad'
 
 // Fallback si el proyecto no tiene equipo cargado aún
 const EQUIPO_FALLBACK = [
-  { nombre: 'Carlos Mendoza', rol: 'Residente de Obra', iniciales: 'CM', color: '#293064', bg: '#EEF0FA' },
-  { nombre: 'Laura Jiménez', rol: 'Supervisora CEMEX', iniciales: 'LJ', color: '#DF343D', bg: '#FEF2F2' },
-  { nombre: 'Ing. Roberto Solis', rol: 'Control de Calidad', iniciales: 'RS', color: '#16A34A', bg: '#F0FDF4' },
+  { nombre: 'Ing. Marcos Fuentes', rol: 'Coordinador CEMEX', iniciales: 'MF', color: '#293064', bg: '#EEF0FA' },
+  { nombre: 'Patricia Olvera', rol: 'Supervisora de Calidad', iniciales: 'PO', color: '#DF343D', bg: '#FEF2F2' },
+  { nombre: 'René Castellanos', rol: 'Residente de Obra', iniciales: 'RC', color: '#16A34A', bg: '#F0FDF4' },
 ]
 
 const AVATAR_COLORS_SESION = [

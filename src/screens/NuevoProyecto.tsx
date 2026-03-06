@@ -114,22 +114,22 @@ export default function NuevoProyecto({ onNavigate }: Props) {
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Nombre del proyecto *</label>
-            <input className="cemex-input" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej. Nave Vesta 4 Aguascalientes" style={inputStyle} />
+            <input className="cemex-input" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej. Bodega Industrial Zona Norte" style={inputStyle} />
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Cliente</label>
-            <input className="cemex-input" value={cliente} onChange={e => setCliente(e.target.value)} placeholder="ej. VYACY" style={inputStyle} />
+            <input className="cemex-input" value={cliente} onChange={e => setCliente(e.target.value)} placeholder="ej. DELNOR" style={inputStyle} />
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Contratista</label>
-            <input className="cemex-input" value={contratista} onChange={e => setContratista(e.target.value)} placeholder="ej. COPACHISA" style={inputStyle} />
+            <input className="cemex-input" value={contratista} onChange={e => setContratista(e.target.value)} placeholder="ej. GARZA & ASOCIADOS" style={inputStyle} />
           </div>
 
           <div>
             <label style={labelStyle}>Coordinador CEMEX</label>
-            <input className="cemex-input" value={coordinador} onChange={e => setCoordinador(e.target.value)} placeholder="ej. Ing. Luis Alberto Cortes" style={inputStyle} />
+            <input className="cemex-input" value={coordinador} onChange={e => setCoordinador(e.target.value)} placeholder="ej. Ing. Marcos Fuentes" style={inputStyle} />
           </div>
         </div>
 

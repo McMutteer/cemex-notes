@@ -1,9 +1,9 @@
 export const proyecto = {
   id: '1',
-  nombre: 'Nave Vesta 4 Aguascalientes',
-  cliente: 'VYACY',
-  contratista: 'COPACHISA',
-  coordinador: 'Ing. Luis Alberto Cortes',
+  nombre: 'Bodega Industrial Zona Norte',
+  cliente: 'DELNOR',
+  contratista: 'GARZA & ASOCIADOS',
+  coordinador: 'Ing. Marcos Fuentes',
   volumenAcumulado: 1715.5,
 }
 
@@ -18,17 +18,17 @@ export const sesionActual = {
 export const datosColado = {
   espesor: '15 cm',
   volumen: '161 m³',
-  producto: 'B-042-4-C-28-12-0-3-201',
+  producto: 'C-040-3-B-20-10-0-3-180',
   frecuencia: '15 mins',
-  codigo: '20020326',
+  codigo: '20031407',
   revenimiento: '12 cms + 2.5 cms',
   fibra: 'No',
   acabado: 'Pulido',
   horario: '5:00 pm',
-  pisero: 'COPACHISA / VIACY',
-  laboratorio: 'COSOC',
-  coordinadorCemex: 'Luis Alberto Cortes',
-  plantaOptima: 'D69 planta sur',
+  pisero: 'GARZA & ASOCIADOS / DELNOR',
+  laboratorio: 'LABOTEC',
+  coordinadorCemex: 'Marcos Fuentes',
+  plantaOptima: 'P12 planta oriente',
   cantidadCR: 8,
   tiempoCiclo: '1.30 hrs aprox',
   estadiaObra: '35 mins aprox',
@@ -36,16 +36,16 @@ export const datosColado = {
 }
 
 export const camiones = [
-  { id: 1, cr: 5894, m3: 7, llega: '5:39', inicia: '5:50', termina: '5:55', esperaCliente: '39 min', esperaCemex: '-', rev: 11, tempConcreto: 31.3, velViento: 18.9, tempAmbiente: 23.6, humedad: '21.5%', evaporacion: 1.53 },
-  { id: 2, cr: 4923, m3: 7, llega: '6:14', inicia: '6:23', termina: '6:35', esperaCliente: '28 min', esperaCemex: '-', rev: 11, tempConcreto: 31.5, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 3, cr: 4969, m3: 7, llega: '6:22', inicia: '6:37', termina: '6:44', esperaCliente: '-', esperaCemex: '15 min', rev: 12, tempConcreto: 31.3, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 4, cr: 5885, m3: 7, llega: '6:34', inicia: '6:48', termina: '7:01', esperaCliente: '-', esperaCemex: '14 min', rev: 11, tempConcreto: 31.1, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 5, cr: 5424, m3: 7, llega: '6:42', inicia: '7:02', termina: '7:11', esperaCliente: '-', esperaCemex: '20 min', rev: 11, tempConcreto: 31.2, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 6, cr: 5883, m3: 7, llega: '6:55', inicia: '7:12', termina: '7:25', esperaCliente: '-', esperaCemex: '17 min', rev: 10, tempConcreto: 30.9, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 7, cr: 4989, m3: 7, llega: '7:04', inicia: '7:27', termina: '7:40', esperaCliente: '-', esperaCemex: '23 min', rev: 11, tempConcreto: 30.8, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 8, cr: 5894, m3: 7, llega: '7:17', inicia: '7:41', termina: '7:55', esperaCliente: '-', esperaCemex: '24 min', rev: 11, tempConcreto: 30.7, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
-  { id: 9, cr: 4923, m3: 7, llega: '7:45', inicia: '7:56', termina: '8:06', esperaCliente: '-', esperaCemex: '11 min', rev: 11, tempConcreto: 30.1, velViento: 16.6, tempAmbiente: 20.9, humedad: '30.9%', evaporacion: 1.46 },
-  { id: 10, cr: 4969, m3: 7, llega: '8:00', inicia: '8:08', termina: '8:17', esperaCliente: '-', esperaCemex: '8 min', rev: 11, tempConcreto: 30.2, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 1, cr: 6102, m3: 7, llega: '5:39', inicia: '5:50', termina: '5:55', esperaCliente: '39 min', esperaCemex: '-', rev: 11, tempConcreto: 31.3, velViento: 18.9, tempAmbiente: 23.6, humedad: '21.5%', evaporacion: 1.53 },
+  { id: 2, cr: 7341, m3: 7, llega: '6:14', inicia: '6:23', termina: '6:35', esperaCliente: '28 min', esperaCemex: '-', rev: 11, tempConcreto: 31.5, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 3, cr: 6287, m3: 7, llega: '6:22', inicia: '6:37', termina: '6:44', esperaCliente: '-', esperaCemex: '15 min', rev: 12, tempConcreto: 31.3, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 4, cr: 7056, m3: 7, llega: '6:34', inicia: '6:48', termina: '7:01', esperaCliente: '-', esperaCemex: '14 min', rev: 11, tempConcreto: 31.1, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 5, cr: 6518, m3: 7, llega: '6:42', inicia: '7:02', termina: '7:11', esperaCliente: '-', esperaCemex: '20 min', rev: 11, tempConcreto: 31.2, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 6, cr: 7193, m3: 7, llega: '6:55', inicia: '7:12', termina: '7:25', esperaCliente: '-', esperaCemex: '17 min', rev: 10, tempConcreto: 30.9, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 7, cr: 6834, m3: 7, llega: '7:04', inicia: '7:27', termina: '7:40', esperaCliente: '-', esperaCemex: '23 min', rev: 11, tempConcreto: 30.8, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 8, cr: 7421, m3: 7, llega: '7:17', inicia: '7:41', termina: '7:55', esperaCliente: '-', esperaCemex: '24 min', rev: 11, tempConcreto: 30.7, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
+  { id: 9, cr: 6102, m3: 7, llega: '7:45', inicia: '7:56', termina: '8:06', esperaCliente: '-', esperaCemex: '11 min', rev: 11, tempConcreto: 30.1, velViento: 16.6, tempAmbiente: 20.9, humedad: '30.9%', evaporacion: 1.46 },
+  { id: 10, cr: 7341, m3: 7, llega: '8:00', inicia: '8:08', termina: '8:17', esperaCliente: '-', esperaCemex: '8 min', rev: 11, tempConcreto: 30.2, velViento: null, tempAmbiente: null, humedad: null, evaporacion: null },
 ]
 
 export const zonasMapa = [
